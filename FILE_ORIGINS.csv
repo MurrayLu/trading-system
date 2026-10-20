@@ -1,0 +1,53 @@
+file,classification,source_commit,description
+.gitattributes,new,,New isolated demo / portfolio packaging; not original application
+.gitignore,new,,New isolated demo / portfolio packaging; not original application
+desktop/MuNTrade.Desktop.csproj,new,,New isolated demo / portfolio packaging; not original application
+desktop/packages.lock.json,new,,New isolated demo / portfolio packaging; not original application
+desktop/Program.cs,new,,New isolated demo / portfolio packaging; not original application
+Directory.Build.props,new,,New isolated demo / portfolio packaging; not original application
+docs/VALIDATION.md,new,,New isolated demo / portfolio packaging; not original application
+FILE_ORIGINS.csv,new,,New isolated demo / portfolio packaging; not original application
+README.md,new,,New isolated demo / portfolio packaging; not original application
+SOURCE_MANIFEST.json,new,,New isolated demo / portfolio packaging; not original application
+src/DemoAdapters.cs,new,,New isolated demo / portfolio packaging; not original application
+src/GlobalUsings.cs,new,,New isolated demo / portfolio packaging; not original application
+src/MuNTrade.Demo.Core.csproj,new,,New isolated demo / portfolio packaging; not original application
+src/packages.lock.json,new,,New isolated demo / portfolio packaging; not original application
+src/PaperSession.cs,new,,New isolated demo / portfolio packaging; not original application
+src/Source/MuNTrade.Abstractions/Contracts/Eventing/IMuEvent.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Contracts/Hubs/IEventBus.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Contracts/Rules/IRiskRule.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Contracts/Time/IClock.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Contracts/Trading/GatewayMarkers.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Contracts/Trading/IOrderGateway.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Domain/Common/Enums/MarketKind.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Domain/Common/Enums/MarketNo.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Domain/Common/Enums/MarketSource.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Domain/MarketData/Enums/DayTradeStatus.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Domain/MarketData/Enums/TickFeedKind.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Domain/Trading/Enums/AggressorSide.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Domain/Trading/Enums/OrderSide.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Domain/Trading/Enums/OrderType.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Domain/Trading/Enums/TimeInForce.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Domain/Trading/Enums/TradeType.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Domain/Trading/ExecutionTrace.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Domain/Trading/OrderFillEvent.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Domain/Trading/OrderRequest.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Domain/Trading/Position.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Domain/Trading/RiskDecision.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Domain/Trading/SignalEvent.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Dtos/Trading/Best5.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Dtos/Trading/BestLevel.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Dtos/Trading/PriceLevel.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Events/Broker/BrokerReportEvent.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Events/MarketData/QuoteBest5Event.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Events/MarketData/QuoteSnapshotEvent.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Abstractions/Events/MarketData/TradeTickEvent.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Core/Hubs/InMemoryEventBus.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Core/Trading/Gateways/PaperTradingGateway.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/Source/MuNTrade.Core/Trading/Rules/EntryWindowRule.cs,adapted,0e70669d5b34d9fbd26bc63ce80574856301d9dd,Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper
+src/TimeAxes.cs,original,0e70669d5b34d9fbd26bc63ce80574856301d9dd,
+tests/Acceptance.csproj,new,,New isolated demo / portfolio packaging; not original application
+tests/packages.lock.json,new,,New isolated demo / portfolio packaging; not original application
+tests/Program.cs,new,,New isolated demo / portfolio packaging; not original application
+THIRD_PARTY_DEPENDENCIES.csv,new,,New isolated demo / portfolio packaging; not original application

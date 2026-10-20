@@ -1,0 +1,299 @@
+[
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Contracts/Eventing/IMuEvent.cs",
+    "source_path": "MuNTrade.Abstractions/Contracts/Eventing/IMuEvent.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "236c62faa107000b3a073cd54fadfce9345230d5377be281537a5c2bb0166b72",
+    "candidate_sha256": "3b1c2312a57ebafe668678f7d695f914e89f6cfcee9fc39b80b9ccf5018ef1a3",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Contracts/Hubs/IEventBus.cs",
+    "source_path": "MuNTrade.Abstractions/Contracts/Hubs/IEventBus.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "15a8f4b80d99a7bca847091b6cf6ccc857477f00aa66660d9763d1e39e8716ef",
+    "candidate_sha256": "6c36009f5498abe3dabf89380a5b9deb629ba19362c71acdad65b57eafb405c4",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Contracts/Rules/IRiskRule.cs",
+    "source_path": "MuNTrade.Abstractions/Contracts/Rules/IRiskRule.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "5c1d3dd1c540ebd8e5354dd4c468396c0766c9088e50eb6bcc20289169e999c0",
+    "candidate_sha256": "5f4b3236e663b6d076b78b35b53b68b03f49d15162614977a0c9a7cf93f4a34f",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Contracts/Time/IClock.cs",
+    "source_path": "MuNTrade.Abstractions/Contracts/Time/IClock.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "e24a34bd387faabfa0a2aca3a18a4eca5259e5af25422d12e5f72d40813a156e",
+    "candidate_sha256": "607939719cf0c75af7d5402823dec98bf58336a6c3192f33409b782d3748ea18",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Contracts/Trading/GatewayMarkers.cs",
+    "source_path": "MuNTrade.Abstractions/Contracts/Trading/GatewayMarkers.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "f33deaf199b4e5b9ac0f743aec2875c518b17a6e456cd647a69225a08d1c7e94",
+    "candidate_sha256": "595f1047ba41b99f6458c9892c5cc8c27276e3b0211277cf12069d47a4ef5610",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Contracts/Trading/IOrderGateway.cs",
+    "source_path": "MuNTrade.Abstractions/Contracts/Trading/IOrderGateway.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "c195f646f63ecd31d301373197bdabaabb4f3be6c4196569fead3db496db3cf6",
+    "candidate_sha256": "07be6c6669f76fe72caa509d83516e3313f465d2708f6f96dd44019d8b1c5e6f",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Domain/Common/Enums/MarketKind.cs",
+    "source_path": "MuNTrade.Abstractions/Domain/Common/Enums/MarketKind.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "cf57fc764e060db7467066a6a938b597c3bb092116ed65d2f4b4b4f26c2cdba6",
+    "candidate_sha256": "40e707e0737e44f41e9f78be0d77cf7cea1a355e025b2854572ffde6e922b359",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Domain/Common/Enums/MarketNo.cs",
+    "source_path": "MuNTrade.Abstractions/Domain/Common/Enums/MarketNo.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "8cdce8ce69d5686dc10aa9fbdf84238fe79786044e6f277597f5d72ad613644e",
+    "candidate_sha256": "f2aeb3ad272bf10d564e6811958eefe3c0099eb043aa22e4b7da2da976648a50",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Domain/Common/Enums/MarketSource.cs",
+    "source_path": "MuNTrade.Abstractions/Domain/Common/Enums/MarketSource.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "0095f15036fa68a85bebb1f12a2c5f17a21ae08346d510d6833d0c31fccf8b65",
+    "candidate_sha256": "c7af4c9d8709065bd270eeaa0fc9d9476c7b98b1763f2ea7cc70527f555b2ed9",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Domain/MarketData/Enums/DayTradeStatus.cs",
+    "source_path": "MuNTrade.Abstractions/Domain/MarketData/Enums/DayTradeStatus.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "b8a51bbb7267d154fe653d25606f37d5c154ed2432ac2a4222115781de58ba86",
+    "candidate_sha256": "ce25395887d3fa063953c2d7e24f9583d2ed3cd74d5a09aec8c6ddc8a4420a4b",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Domain/MarketData/Enums/TickFeedKind.cs",
+    "source_path": "MuNTrade.Abstractions/Domain/MarketData/Enums/TickFeedKind.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "d6475e8135551398f35df3beb98bd81d01b35d52dc4669f90d287aac96622cda",
+    "candidate_sha256": "18d02caa8c769e09a8a14aad3cc8109247cfbd91299673f9d9d21cc2e6a0319e",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Domain/Trading/Enums/AggressorSide.cs",
+    "source_path": "MuNTrade.Abstractions/Domain/Trading/Enums/AggressorSide.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "70ef972f2074b12c095b2b814ba78b3695e88e964b741d5d566b5fc7d69b234c",
+    "candidate_sha256": "1edb66686ecfe1af3af01f16e24569d73418bb97d7bcc95f886dcd2c7a9f6567",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Domain/Trading/Enums/OrderSide.cs",
+    "source_path": "MuNTrade.Abstractions/Domain/Trading/Enums/OrderSide.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "d46aece028c203c594e5fdfb85da1274cd1dca6f892f27d72acdc9a54bd85ef4",
+    "candidate_sha256": "19ec15771ee24970e262f82f4dfc9384c3fe3d6edcaeb41863a9bb8996411b8c",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Domain/Trading/Enums/OrderType.cs",
+    "source_path": "MuNTrade.Abstractions/Domain/Trading/Enums/OrderType.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "5c65f55da6443e405bed1b37c7517e175ec39dea2586394a6261b489b14882c9",
+    "candidate_sha256": "871d0efb04540d73d75bb5a7f30d2e558ffbb95e0c2cb99bf77a2a5ba34b2fa9",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Domain/Trading/Enums/TimeInForce.cs",
+    "source_path": "MuNTrade.Abstractions/Domain/Trading/Enums/TimeInForce.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "47e710697b7513ef1027393e282ab8c2fe3fb909d7fb171abbe62bb3a3819f56",
+    "candidate_sha256": "398ada48acc435d6446e37a021bed8506f041b2c6b1a5979bfbe8f8362bc00cd",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Domain/Trading/Enums/TradeType.cs",
+    "source_path": "MuNTrade.Abstractions/Domain/Trading/Enums/TradeType.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "27c757cadd8c4dfa4168965c52ad3402251729a001b5680bee73610020c3c862",
+    "candidate_sha256": "5b1fe9d060e674235459eb2b4f091dc8fdcce42aa8d776f925fe901ecfb888a7",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Domain/Trading/ExecutionTrace.cs",
+    "source_path": "MuNTrade.Abstractions/Domain/Trading/ExecutionTrace.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "66dacc51d7accc5ea76d2e0dba987b0017c1db2601e7d1078acf535f534db410",
+    "candidate_sha256": "e8ddc200ab656a75ec868f17756816fbbf4cbc07b05a0bfc324ffa9d98df4e4d",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Domain/Trading/OrderFillEvent.cs",
+    "source_path": "MuNTrade.Abstractions/Domain/Trading/OrderFillEvent.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "d7d737b3d423d7be8937dd212d4b65012875504fc58b9d5a657f63307eac9c93",
+    "candidate_sha256": "7bb2ef5d2715bb9f296dfa6a67939096f0f47b4979dbd466a6f517aeaace58a4",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Domain/Trading/OrderRequest.cs",
+    "source_path": "MuNTrade.Abstractions/Domain/Trading/OrderRequest.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "35f7cb97cccdbf155e2f3206a3269f8300f287267246900533566791ef56ea1d",
+    "candidate_sha256": "0db85f4dc5c6180b9cb682851f0b104bc28ee94da1705acd1d2627feb25d55ca",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Domain/Trading/Position.cs",
+    "source_path": "MuNTrade.Abstractions/Domain/Trading/Position.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "2c6841cd68672358d573bbadaac8d3a1e53a8c1801e2b4061469e87f3bac6eeb",
+    "candidate_sha256": "2b93f3d5b8cd28f0434bf501e39433da5ab0616d43f587692e701c8cd829fafb",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Domain/Trading/RiskDecision.cs",
+    "source_path": "MuNTrade.Abstractions/Domain/Trading/RiskDecision.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "9309bbace5381bb122df8c074d71a6320ecda318708215ba01ac4c50c9cf6e2b",
+    "candidate_sha256": "c63eb4d4eeb03dab6b1482e4d7435f92b36837c40f7ae081b77e07a150136a77",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Domain/Trading/SignalEvent.cs",
+    "source_path": "MuNTrade.Abstractions/Domain/Trading/SignalEvent.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "aa4edb830e937fe8278b9561d183cb900254e17dfbe424cbe7cf6eadee1969f5",
+    "candidate_sha256": "b597b29ce9dc99648c6b233cfa88f68d0d9bba9fb40b9ac11d1797a5aca8b07e",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Dtos/Trading/Best5.cs",
+    "source_path": "MuNTrade.Abstractions/Dtos/Trading/Best5.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "5cbbef26f197b9fbdf931356775d68e2048a850bd7f12471eea8aaf36f3d86e4",
+    "candidate_sha256": "c644b65af04f78d2516a12228f011893f938cf51f70b8171bcccb1197004acb8",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Dtos/Trading/BestLevel.cs",
+    "source_path": "MuNTrade.Abstractions/Dtos/Trading/BestLevel.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "a299c6dd4138fe2ba50f44545da7cdd75b0cd28cedd1406f739623727d7efa6b",
+    "candidate_sha256": "4d480dc0b64484712166a377eb55fe52ba7e3cc47e12cfcf490d484bd58ac364",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Dtos/Trading/PriceLevel.cs",
+    "source_path": "MuNTrade.Abstractions/Dtos/Trading/PriceLevel.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "687f87398ac53407faffc39cbfa4c68074d22a101bb68d67122850cbd2b80820",
+    "candidate_sha256": "5d868ab8c1f7bccc3ecdc39e93d9a4dcc3d78c854cedb54d4d9ba93fa161c1b3",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Events/Broker/BrokerReportEvent.cs",
+    "source_path": "MuNTrade.Abstractions/Events/Broker/BrokerReportEvent.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "d633ed444d81987dcfc696862a1413f1609d4b6e39bc9eaf41dafb8632778528",
+    "candidate_sha256": "c694ac5ccbe96b7fb3670283d6d2f0d8aaadaae9d0d9ed8e618da7195e912c58",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Events/MarketData/QuoteBest5Event.cs",
+    "source_path": "MuNTrade.Abstractions/Events/MarketData/QuoteBest5Event.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "e9fecad4e61f5850553f465ff7a5ed3ecaafc3966c84192e865c035d6f8b0e55",
+    "candidate_sha256": "92a3e85fc6ebeb0fab5e2e25cd26fcde9c8619f8450c7c0ec1585cc168034fd5",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Events/MarketData/QuoteSnapshotEvent.cs",
+    "source_path": "MuNTrade.Abstractions/Events/MarketData/QuoteSnapshotEvent.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "024b44a273a9f187371dd0c3a4450d84c9f9b8071b01da4c17a518113cef4026",
+    "candidate_sha256": "f1bc9e79237ff5f60038d73b821009c0f956ea7de394af27ce9e74b7ccf717ec",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Abstractions/Events/MarketData/TradeTickEvent.cs",
+    "source_path": "MuNTrade.Abstractions/Events/MarketData/TradeTickEvent.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "156294c0e626d9cf5c7fca191f4a3b72b0c3657be358383662dd827ceae0055c",
+    "candidate_sha256": "4a1b7adcbc46b097a8bbb1c3d1bfe073d08ea3640c8eb873dd317e2bcef2fcf6",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Core/Hubs/InMemoryEventBus.cs",
+    "source_path": "MuNTrade.Core/Hubs/InMemoryEventBus.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "bc64632df64fb58e19ea49029a07e78c55bde8065a0a9a7ad4df56197527c6c6",
+    "candidate_sha256": "614289968e558d449998c6e498df87ce34da1fd67ac984e1edaddb006a35e3ad",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Core/Trading/Gateways/PaperTradingGateway.cs",
+    "source_path": "MuNTrade.Core/Trading/Gateways/PaperTradingGateway.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "252f78338f6a646d7be93d9861bfcfd03473354a11613e11fa3d1cd004caf72e",
+    "candidate_sha256": "98a635cd5c4474a204c9a96befcf57ac0c7b69d2e05f91f3073fd3001cbc258d",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/Source/MuNTrade.Core/Trading/Rules/EntryWindowRule.cs",
+    "source_path": "MuNTrade.Core/Trading/Rules/EntryWindowRule.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "3935a1dfb43c51f96a2e806465bd4e58b112c14de34802a32623b8bf6ad5a40a",
+    "candidate_sha256": "e19ce6a2de7b7a4a4415540fd210350411b69a048b3f6fee2eb98eb1b3a1b12b",
+    "classification": "adapted",
+    "adaptation": "Remove unused imports; gateway rejects LIVE/invalid qty and uses unique demo sequence; time-window constructor explicit synthetic settings; default trace is Paper"
+  },
+  {
+    "file": "src/TimeAxes.cs",
+    "source_path": "MuNTrade.Abstractions/Time/TimeAxes.cs",
+    "source_commit": "0e70669d5b34d9fbd26bc63ce80574856301d9dd",
+    "source_sha256": "d03b792a2e310b5cc53cdbb43dac7957699268eee2071fb6b9ad1a95f157aeb6",
+    "candidate_sha256": "d03b792a2e310b5cc53cdbb43dac7957699268eee2071fb6b9ad1a95f157aeb6",
+    "classification": "original",
+    "adaptation": ""
+  }
+]

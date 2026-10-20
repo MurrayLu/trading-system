@@ -1,0 +1,9 @@
+**/bin/
+**/obj/
+node_modules/
+dist/
+artifacts/
+.dev.vars*
+.env*
+*.sqlite*
+*.db
