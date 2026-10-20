@@ -8,7 +8,7 @@
 
 ## 公開範圍：Paper-only Isolated Demo
 
-> 本 Repository **不是原始 MuNTrade 完整系統**。公開 WPF 視窗是另建的精簡展示入口，非原始操作介面；本次不提供原系統截圖或影片。
+> 本 Repository **不是原始 MuNTrade 完整系統**。公開 WPF 視窗是另建的精簡展示入口，非原始操作介面；原始系統畫面另列於下方，不代表其中所有功能可在公開版執行。
 
 原始系統需要券商環境、未公開的本地資料與設定。公開版擷取部分真正的事件傳遞、委託及規則程式，配合新建的安全組裝層，以**合成行情**驗證 Paper 委託流程。沒有券商 SDK、LIVE gateway、正式憑證或真實帳務，也不連線券商。
 
@@ -25,6 +25,14 @@ Adapted PaperTradingGateway
         ↓
 Order / Fill Events → Offline Position State → Demo WPF
 ```
+
+## 原始系統畫面（Original Application）
+
+> 以下為原始私人專案的實際 WPF 介面截圖，與本 Repository 提供的精選原始碼及 Isolated Demo 不同。原始完整系統依賴未公開的資料庫、外部服務及執行環境。
+
+![Replay Training：原始 WPF 的個股與 TX00 六圖、歷史成交明細及回放控制](docs/images/original-application/03-replay-training.png)
+
+原始 Replay Training 以既有本地 2026-10-19 歷史資料呈現個股與 TX00 多週期六圖、Tick Tape、時間回放及模擬交易操作入口，訓練帳戶區已遮蔽，畫面不代表即時行情、真實資金或交易績效。
 
 ## 程式碼導覽
 
