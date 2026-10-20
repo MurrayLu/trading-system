@@ -30,6 +30,10 @@ Order / Fill Events → Offline Position State → Demo WPF
 
 > 以下為原始私人專案的實際 WPF 介面截圖，與本 Repository 提供的精選原始碼及 Isolated Demo 不同。原始完整系統依賴未公開的資料庫、外部服務及執行環境。
 
+![原始 MuNTrade 交易主介面歷史截圖](docs/images/original-application/01-trading-dashboard.png)
+
+原始交易主介面於 2026-01-12 的歷史畫面，呈現行情監控、Order Flow 與委託簿，保留當時模擬模式，帳戶識別與資金／持倉區已遮蔽或裁切。
+
 ![Replay Training：原始 WPF 的個股與 TX00 六圖、歷史成交明細及回放控制](docs/images/original-application/03-replay-training.png)
 
 原始 Replay Training 以既有本地 2026-10-19 歷史資料呈現個股與 TX00 多週期六圖、Tick Tape、時間回放及模擬交易操作入口，訓練帳戶區已遮蔽，畫面不代表即時行情、真實資金或交易績效。
