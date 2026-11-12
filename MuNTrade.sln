@@ -10,6 +10,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MuNTrade.Infrastructure", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MuNTrade.Core.Tests", "tests\MuNTrade.Core.Tests\MuNTrade.Core.Tests.csproj", "{DD620777-D7E0-4A0D-BFC1-D4BC6B6FEF01}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MuNTrade.Demo.Cli", "src\MuNTrade.Demo.Cli\MuNTrade.Demo.Cli.csproj", "{2D0788C8-781B-4A52-B215-89C932FEA067}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MuNTrade.SampleData", "tools\MuNTrade.SampleData\MuNTrade.SampleData.csproj", "{62AEF5C2-93E6-4E40-937A-3107CC8BED11}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MuNTrade.Demo.Tests", "tests\MuNTrade.Demo.Tests\MuNTrade.Demo.Tests.csproj", "{4AFAFE55-2396-4764-848A-F2B99EB33561}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,5 +38,17 @@ Global
 		{DD620777-D7E0-4A0D-BFC1-D4BC6B6FEF01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD620777-D7E0-4A0D-BFC1-D4BC6B6FEF01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD620777-D7E0-4A0D-BFC1-D4BC6B6FEF01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D0788C8-781B-4A52-B215-89C932FEA067}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D0788C8-781B-4A52-B215-89C932FEA067}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D0788C8-781B-4A52-B215-89C932FEA067}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D0788C8-781B-4A52-B215-89C932FEA067}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62AEF5C2-93E6-4E40-937A-3107CC8BED11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62AEF5C2-93E6-4E40-937A-3107CC8BED11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62AEF5C2-93E6-4E40-937A-3107CC8BED11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62AEF5C2-93E6-4E40-937A-3107CC8BED11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4AFAFE55-2396-4764-848A-F2B99EB33561}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4AFAFE55-2396-4764-848A-F2B99EB33561}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4AFAFE55-2396-4764-848A-F2B99EB33561}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4AFAFE55-2396-4764-848A-F2B99EB33561}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

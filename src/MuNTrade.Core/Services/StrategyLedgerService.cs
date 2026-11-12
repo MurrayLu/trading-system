@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using MuNTrade.Abstractions.Domain.MarketData;
+using Microsoft.Extensions.Options;
 using MuNTrade.Abstractions.Domain.Trading;
 using MuNTrade.Abstractions.Domain.Capital;
 using MuNTrade.Abstractions.Domain.Optimization;
@@ -16,6 +17,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using MuNTrade.Core.Capital; // Patch 18: Path unification
+using MuNTrade.Core.Settings;
 
 namespace MuNTrade.Core.Services
 {
@@ -25,6 +27,7 @@ namespace MuNTrade.Core.Services
         private readonly ILogger<StrategyLedgerService> _logger;
         private readonly string _paperRoot;
         private readonly string _liveRoot;
+        private readonly string? _configuredPaperRoot;
         private readonly ConcurrentQueue<CompletedTrade> _paramQueue = new();
         private Task? _workerTask;
         private readonly System.Threading.CancellationTokenSource _cts = new();
@@ -53,15 +56,36 @@ namespace MuNTrade.Core.Services
         private long _conflictedCount = 0;
         private long _registryMissCount = 0;
 
-        public StrategyLedgerService(IEventBus eventBus, ILogger<StrategyLedgerService> logger)
+        public StrategyLedgerService(
+            IEventBus eventBus,
+            ILogger<StrategyLedgerService> logger,
+            IOptionsMonitor<BacktestSettings> backtestSettings)
         {
             _eventBus = eventBus;
             _logger = logger;
 
-            var simPath = CapitalConfigService.GetSimAccountsPath();
-            var livePath = CapitalConfigService.GetLiveAccountsPath();
-            _paperRoot = HistoryPath.ResolveStrategiesRoot("Sim:Paper:All:Default", ensureExists: true);
-            _liveRoot = HistoryPath.ResolveStrategiesRoot("Real", ensureExists: true);
+            var configuredRoot = backtestSettings.CurrentValue.StrategyEventRoot;
+            _configuredPaperRoot = string.IsNullOrWhiteSpace(configuredRoot)
+                ? null
+                : Path.GetFullPath(configuredRoot);
+
+            string simPath;
+            string livePath;
+            if (_configuredPaperRoot is null)
+            {
+                simPath = CapitalConfigService.GetSimAccountsPath();
+                livePath = CapitalConfigService.GetLiveAccountsPath();
+                _paperRoot = HistoryPath.ResolveStrategiesRoot("Sim:Paper:All:Default", ensureExists: true);
+                _liveRoot = HistoryPath.ResolveStrategiesRoot("Real", ensureExists: true);
+            }
+            else
+            {
+                simPath = _configuredPaperRoot;
+                livePath = _configuredPaperRoot;
+                _paperRoot = _configuredPaperRoot;
+                _liveRoot = _configuredPaperRoot;
+                Directory.CreateDirectory(_configuredPaperRoot);
+            }
 
             _eventBus.Subscribe<CompletedTrade>(OnCompletedTrade);
             _logger.LogInformation("[StrategyLedger] Started. PaperRoot={PaperRoot} LiveRoot={LiveRoot} SimPath={SimPath} LivePath={LivePath}",
@@ -106,7 +130,7 @@ namespace MuNTrade.Core.Services
             }
 
             var accountKey = ResolveAccountKey(trade);
-            var strategiesRoot = HistoryPath.ResolveStrategiesRoot(accountKey, ensureExists: true);
+            var strategiesRoot = ResolveStrategiesRoot(accountKey);
             var safeKey = ToSafeStrategyKey(ExtractStrategyDisplayName(trade.StrategyId));
             var exit = trade.ExitTime == default ? DateTimeOffset.Now : trade.ExitTime;
             var month = exit.ToString("yyyyMM");
@@ -145,7 +169,7 @@ namespace MuNTrade.Core.Services
                     catch (Exception ex)
                     {
                         var accountKey = ResolveAccountKey(trade);
-                        var strategiesRoot = HistoryPath.ResolveStrategiesRoot(accountKey, ensureExists: true);
+                        var strategiesRoot = ResolveStrategiesRoot(accountKey);
                         var safeKey = ToSafeStrategyKey(ExtractStrategyDisplayName(trade?.StrategyId));
                         var exit = trade.ExitTime == default ? DateTimeOffset.Now : trade.ExitTime;
                         var month = exit.ToString("yyyyMM");
@@ -170,7 +194,7 @@ namespace MuNTrade.Core.Services
         {
             // {HistoryDir}\Strategies\{SafeStrategyKey}\{yyyyMM}.jsonl
             var accountKey = ResolveAccountKey(trade);
-            var strategiesRoot = HistoryPath.ResolveStrategiesRoot(accountKey, ensureExists: true);
+            var strategiesRoot = ResolveStrategiesRoot(accountKey);
             var safeKey = ToSafeStrategyKey(ExtractStrategyDisplayName(trade?.StrategyId));
             var strategyDir = Path.Combine(strategiesRoot, safeKey);
             Directory.CreateDirectory(strategyDir);
@@ -202,6 +226,17 @@ namespace MuNTrade.Core.Services
                     trade?.StrategyId, safeKey, filePath);
                 throw;
             }
+        }
+
+        private string ResolveStrategiesRoot(string? accountKey)
+        {
+            if (_configuredPaperRoot is not null && HistoryPath.IsPaperAccountKey(accountKey))
+            {
+                Directory.CreateDirectory(_configuredPaperRoot);
+                return _configuredPaperRoot;
+            }
+
+            return HistoryPath.ResolveStrategiesRoot(accountKey, ensureExists: true);
         }
 
         private static string ExtractStrategyDisplayName(string? strategyId)

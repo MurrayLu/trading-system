@@ -122,8 +122,11 @@ public sealed class OrderBookFlowTests
             new[] { (100m, 200), (99m, 100) },
             new[] { (102m, 200), (103m, 100) }));
 
-        // 不應產生 Big 類流動性事件 (Cum 類因 setup 殘留且 gap=0 會重發，故不檢查)
-        Assert.DoesNotContain(bus.Events, e => e is BigHangEvent || e is BigPullEvent);
+        // 被 guard 擋下的 Big 類事件仍會發出，但必須標示為 suppressed。
+        Assert.DoesNotContain(bus.Events, e =>
+            e is BigHangEvent { IsSuppressed: false } || e is BigPullEvent { IsSuppressed: false });
+        var suppressed = Assert.Single(bus.Events.OfType<BigHangEvent>().Where(e => e.IsSuppressed));
+        Assert.Equal("Exposed", suppressed.Reason.ToString());
     }
 
     // 2) Trade Consumption：被吃掉的深度不可視為 Pull

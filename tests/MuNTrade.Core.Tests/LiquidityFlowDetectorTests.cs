@@ -62,7 +62,9 @@ namespace MuNTrade.Core.Tests
                 new Dictionary<decimal, double>(),
                 addFloor: 5, pullFloor: 5, isBroken: false, p95Spread: 1, guards: StrictGuards, flowStats: FlowWindowStats.Zero);
 
-            Assert.Empty(evts);
+            var suppressed = Assert.IsType<BigHangEvent>(Assert.Single(evts));
+            Assert.True(suppressed.IsSuppressed);
+            Assert.Equal("NewLevel", suppressed.Reason.ToString());
         }
 
         [Fact]
@@ -108,7 +110,9 @@ namespace MuNTrade.Core.Tests
                 new Dictionary<decimal, double>(),
                 5, 5, false, 1, StrictGuards, FlowWindowStats.Zero);
 
-            Assert.Empty(evts);
+            var suppressed = Assert.IsType<BigPullEvent>(Assert.Single(evts));
+            Assert.True(suppressed.IsSuppressed);
+            Assert.Equal("Young", suppressed.Reason.ToString());
         }
 
         [Fact]
@@ -139,7 +143,9 @@ namespace MuNTrade.Core.Tests
                 new Dictionary<decimal, double>(),
                 5, 5, false, 1, StrictGuards, FlowWindowStats.Zero);
 
-            Assert.Empty(evts2);
+            var suppressed = Assert.IsType<BigPullEvent>(Assert.Single(evts2));
+            Assert.True(suppressed.IsSuppressed);
+            Assert.Equal("Absorbed", suppressed.Reason.ToString());
         }
 
         [Fact]

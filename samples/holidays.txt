@@ -1,0 +1,1 @@
+# Synthetic sample calendar; weekends are handled by the reader.

@@ -32,6 +32,8 @@ namespace MuNTrade.Core.Settings
         public string StrategyTemplateId { get; set; } = string.Empty;
         public string AccountKey { get; set; } = "Sim:Paper:All:Default";
         public string ReportRoot { get; set; } = "Reports";
+        /// <summary>Optional root for paper strategy-ledger events; null preserves the legacy Config/History path.</summary>
+        public string? StrategyEventRoot { get; set; }
         public bool SkipMissingData { get; set; } = true;
         public BacktestRiskOptions Risk { get; set; } = new();
         public BacktestExecutionOptions Execution { get; set; } = new();
