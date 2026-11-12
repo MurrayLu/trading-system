@@ -1,5 +1,4 @@
-﻿// MuNTrade.Abstractions/Domain/Models/OptimizationJob.cs
-
+﻿
 using System.Collections.Generic;
 
 namespace MuNTrade.Abstractions.Domain.Optimization
@@ -17,7 +16,7 @@ namespace MuNTrade.Abstractions.Domain.Optimization
         public Dictionary<string, object> OptionOverrides { get; set; } = new();
 
         /// <summary>
-        /// 【v7.5 修正】新增此屬性，用於覆寫 StrategyParameters 的參數。
+        /// Strategy parameter overrides applied to this job.
         /// </summary>
         public Dictionary<string, object> StrategyParamOverrides { get; set; } = new();
     }

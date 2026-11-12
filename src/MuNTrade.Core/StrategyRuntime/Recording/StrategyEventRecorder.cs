@@ -47,11 +47,9 @@ namespace MuNTrade.Core.StrategyRuntime.Recording
 
                 if (id.HasValue)
                 {
-                    // Fire and forget, or queue. For MVP S2: simple task run
+                    // Append events asynchronously.
                     // Warning: High traffic concurrency issues possible in JsonlStore (File Lock).
                     // JsonlStore AppendAsync uses File.AppendAllTextAsync which handles some concurrency but not heavy load
-                    // Ideally we use a Channel here.
-                    // For MVP 6B: Fire and Forget.
                     _ = _store.AppendAsync(id.Value, evt, CancellationToken.None);
                 }
             }

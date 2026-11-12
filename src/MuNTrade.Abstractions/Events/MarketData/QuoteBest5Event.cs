@@ -1,5 +1,4 @@
-﻿// MuNTrade.Abstractions/Models/Events/QuoteBest5Event.cs
-using System;
+﻿using System;
 using MuNTrade.Abstractions.Time;
 using System.Collections.Generic;
 using MuNTrade.Abstractions.Dtos.Trading;
@@ -22,9 +21,6 @@ namespace MuNTrade.Abstractions.Events.MarketData
         public ArrivalTs ArrivalTs { get; set; }
 
         public TickFeedKind FeedKind { get; set; } = TickFeedKind.RealTime;
-
-        [Obsolete("Use ArrivalTs instead.")]
-        public DateTime Timestamp { get => ArrivalTs.Value; set => ArrivalTs = new ArrivalTs(value); }
 
         /// <summary>
         /// 對應 OnNotifyBest5LONG 的 sMarketNo 參數。

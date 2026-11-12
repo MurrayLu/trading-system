@@ -97,7 +97,7 @@ namespace MuNTrade.Abstractions.Domain.Capital
         public DateTime CreatedAt { get; set; }
         public DateTime LastUpdated { get; set; }
 
-        // [New] Persistent Daily PnL Tracking
+        // Persistent Daily PnL Tracking
         // This solves the problem where PnL resets on app restart or fails to update due to race conditions.
         private decimal _dayRealizedPnL;
         public decimal DayRealizedPnL
@@ -107,7 +107,7 @@ namespace MuNTrade.Abstractions.Domain.Capital
         }
         public DateTime DayPnLDate { get; set; }
 
-        // [New] Market-specific realized PnL (avoid cross-contamination between stock/futures)
+        // Market-specific realized PnL (avoid cross-contamination between stock/futures)
         public decimal StockDayRealizedPnL { get; set; }
         public decimal FuturesDayRealizedPnL { get; set; }
         public DateOnly StockDayPnLDate { get; set; }

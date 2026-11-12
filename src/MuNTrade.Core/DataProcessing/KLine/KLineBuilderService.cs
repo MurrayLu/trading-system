@@ -1,5 +1,4 @@
-﻿// MuNTrade.Core/DataProcessing/KLine/KLineBuilderService.cs (雙模式最終版)
-
+﻿
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -33,7 +32,6 @@ using KLineModel = MuNTrade.Abstractions.Domain.MarketData.KLine;
 
 namespace MuNTrade.Core.DataProcessing.KLine
 {
-    // ★ 修改：繼承自 BackgroundService 以支援 LIVE 模式自動啟動
     public class KLineBuilderService : BackgroundService
     {
         private readonly ILogger<KLineBuilderService> _logger;
@@ -48,7 +46,6 @@ namespace MuNTrade.Core.DataProcessing.KLine
         private readonly ConcurrentDictionary<string, long> _lastPartialTicks = new();
         private readonly int _partialMinIntervalMs;
 
-        // ★ MODIFIED: Changed format from ':' to '_' for consistency.
         private static string PeriodKey(DynamicBar bar)
             => bar.Config == null ? "Unknown" : $"{bar.Config.Type}_{bar.Config.Period}";
 
@@ -73,7 +70,7 @@ namespace MuNTrade.Core.DataProcessing.KLine
             _builderCore.OnBarClosed += OnBarClosed;
             _builderCore.OnBarPartial += OnBarPartial;
 
-            _partialMinIntervalMs = aggregatorSettings?.Value?.PartialMinIntervalMs ?? 100; // 新增設定，沒設就用 100ms
+            _partialMinIntervalMs = aggregatorSettings?.Value?.PartialMinIntervalMs ?? 100; // Defaults to 100 ms when unset.
 
 
             if (aggregatorSettings?.Value?.EnabledBarConfigs != null)
@@ -87,7 +84,7 @@ namespace MuNTrade.Core.DataProcessing.KLine
         }
 
         /// <summary>
-        /// ★ 保留：這個公開方法是給 BacktestEngine 手動呼叫的
+        ///  保留：這個公開方法是給 BacktestEngine 手動呼叫的
         /// </summary>
         public void ProcessTick(TickData tick)
         {
@@ -101,7 +98,6 @@ namespace MuNTrade.Core.DataProcessing.KLine
             var period = PeriodKey(bar); // Use the unified helper method
             PersistBarSnapshot(bar, period);
 
-            // ★ MODIFIED: Updated log format to include EndTime.
             /*_logger.LogDebug("[KLine Closed] {Symbol}|{Period} End={EndTime:yyyy-MM-dd HH:mm} | O={Open} H={High} L={Low} C={Close} V={Volume}",
                                  bar.StockId,
                                  period,
@@ -140,7 +136,6 @@ namespace MuNTrade.Core.DataProcessing.KLine
             var period = PeriodKey(bar);
             PersistBarSnapshot(bar, period);
 
-            // ★ MODIFIED: Updated log format to include EndTime.
             _logger.LogDebug("[KLine Partial] {Symbol}|{Period} End={EndTime:yyyy-MM-dd HH:mm} | O={Open} H={High} L={Low} C={Close} V={Volume}",
                                  bar.StockId,
                                  period,
@@ -188,27 +183,14 @@ namespace MuNTrade.Core.DataProcessing.KLine
         }
 
         /// <summary>
-        /// ★ 新增：這是 BackgroundService 的核心執行迴圈，供 LIVE 模式自動啟動
+        /// Keeps the hosted service alive while market data events are processed.
         /// </summary>
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            // ★ 核心修正 2：
-            // 從 IOptions<ApplicationSettings> 讀取運行模式
-            // (您需要在建構子中注入 IOptions<ApplicationSettings> opt)
-            // 假設您已經注入了...
-
-            // 在 LIVE 模式下 (AppMode.Execution)，Tick 由 MarketDataPipeline 驅動，此服務只作為事件發佈器，
-            // 其建構子中的事件訂閱 (_builderCore.OnBarClosed += ...) 已經足夠。
-            // 因此，ExecuteAsync 不需要做任何事，只需保持服務存活即可。
+            // In execution mode, MarketDataPipeline drives ticks and the constructor subscription publishes bars.
 
             _logger.LogInformation("[KLineSvc] K線建構服務已啟動 (Hosted Service 模式)...");
 
-            // 檢查是否在非 LIVE 模式 (例如 Backtest)
-            // if (_appSettings.AppMode != AppMode.Execution) {
-            //     _eventBus.Subscribe<TradeTickEvent>(...);
-            // }
-
-            // 對於 LIVE 模式，我們直接返回一個無限等待的任務，直到應用程式關閉。
             return Task.Delay(Timeout.Infinite, stoppingToken);
         }
     }

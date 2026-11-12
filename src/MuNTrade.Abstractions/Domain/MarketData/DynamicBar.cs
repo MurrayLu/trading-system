@@ -14,7 +14,7 @@ namespace MuNTrade.Abstractions.Domain.MarketData
 {
     public sealed class DynamicBar : IMarketStamped
     {
-        // ---- 對外公開屬性（唯讀） ----
+        //對外公開屬性（唯讀） ----
         public string StockId { get; private set; } = "";
         public MarketNo MarketNo { get; set; }
         public MarketSource Source { get; set; }
@@ -29,7 +29,7 @@ namespace MuNTrade.Abstractions.Domain.MarketData
         public ExchangeTs LastTickTime { get; private set; }
         public BarConfig? Config { get; private set; }
 
-        // ---- 建構子 ----
+        //建構子 ----
         private DynamicBar() { } // for snapshot/clone
 
         public DynamicBar(TickData first)
@@ -45,7 +45,7 @@ namespace MuNTrade.Abstractions.Domain.MarketData
             LastTickTime = first.ExchangeTs;
         }
 
-        // ---- 聚合 ----
+        //聚合 ----
         public void AddTick(TickData t, long? volDeltaIfCumulative = null)
         {
             High = Math.Max(High, t.Price);
@@ -56,7 +56,7 @@ namespace MuNTrade.Abstractions.Domain.MarketData
             LastTickTime = t.ExchangeTs;
         }
 
-        // ---- Builder / Store 專用 API ----
+        //Builder / Store 專用 API ----
         internal void ForceStockId(string id) => StockId = id;
         internal void ForceMarketInfo(MarketNo mkt, MarketSource src) { MarketNo = mkt; Source = src; }
         internal void ForceConfig(BarConfig cfg) => Config = cfg;
@@ -78,7 +78,7 @@ namespace MuNTrade.Abstractions.Domain.MarketData
             return this;
         }
 
-        // ---- 快照工具 ----
+        //快照工具 ----
         public static DynamicBar FromSnapshot(string stockId, BarConfig cfg,
                                               ExchangeTs start, ExchangeTs end,
                                               decimal o, decimal h, decimal l, decimal c,

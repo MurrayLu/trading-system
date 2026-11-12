@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace MuNTrade.Abstractions.Contracts.Brokers
 {
     /// <summary>
-    /// 管理行情訂閱的最終版介面。
+    /// 管理行情訂閱的介面。
     /// </summary>
     public interface ISubscriptionManager
     {

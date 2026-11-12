@@ -5,7 +5,6 @@ using Microsoft.Extensions.Options;
 using MuNTrade.Abstractions.Domain.OrderBook;
 using MuNTrade.Core.OrderBook;
 using MuNTrade.Core.Settings;
-using MuNTrade.Core.Trading.Slice1;
 using MuNTrade.Abstractions.Events.MarketData;
 using MuNTrade.Abstractions.Events.OrderBook;
 using MuNTrade.Abstractions.Dtos.OrderBook;
@@ -33,7 +32,7 @@ namespace MuNTrade.Core.Tests
         {
             public T CurrentValue { get; }
             public DummyOptionsMonitor(T val) => CurrentValue = val;
-            public T Get(string name) => CurrentValue;
+            public T Get(string? name) => CurrentValue;
             public IDisposable OnChange(Action<T, string> listener) => new DisposableStub();
             private class DisposableStub : IDisposable { public void Dispose() { } }
         }

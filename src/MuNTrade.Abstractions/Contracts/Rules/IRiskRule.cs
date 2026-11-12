@@ -12,7 +12,6 @@ namespace MuNTrade.Abstractions.Contracts.Rules
     public interface IRiskRule
     {
         /// <summary>
-        /// ★★★ 進階修改：讓規則可以感知當前倉位 ★★★
         /// </summary>
         RiskDecision Evaluate(OrderRequest request, Position currentPosition);
     }

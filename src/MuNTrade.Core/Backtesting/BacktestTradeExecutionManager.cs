@@ -114,7 +114,7 @@ namespace MuNTrade.Core.Backtesting
 
         public Task CancelAsync(string orderId, CancellationToken ct = default)
         {
-            // Backtest MVP: no-op cancel
+            // Backtest cancellation is currently a no-op.
             return Task.CompletedTask;
         }
     }

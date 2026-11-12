@@ -16,7 +16,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-using MuNTrade.Core.Capital; // Patch 18: Path unification
+using MuNTrade.Core.Capital;
 using MuNTrade.Core.Settings;
 
 namespace MuNTrade.Core.Services
@@ -44,12 +44,12 @@ namespace MuNTrade.Core.Services
             DateTimeOffset RecordedAt,
             CompletedTrade Trade);
 
-        // Patch 25: Internal in-memory cache for ViewModel UI
-        // Since this is just a ledger service, keeping all strategy trades in memory is 
+        // In-memory cache for UI views.
+        // Since this is just a ledger service, keeping all strategy trades in memory is
         // acceptable for a session-based desktop app (unless millions of trades).
         private readonly ConcurrentDictionary<string, List<CompletedTrade>> _strategyTrades = new();
 
-        // Patch 25: Strategy Stats & Diagnostics
+        // Strategy statistics and diagnostics.
         private readonly ConcurrentDictionary<string, StrategyStats> _strategyStats = new();
 
         private long _unattributedCount = 0;
@@ -119,9 +119,7 @@ namespace MuNTrade.Core.Services
             // Update Stats
             if (_strategyTrades.TryGetValue(sid, out var currentList))
             {
-                // Note: currentList is locked inside AddOrUpdate factory, but safely accessible here? 
-                // Wait, GetOrAdd returns the value. Concurrency is tricky.
-                // We should take a snapshot for stats calculation to avoid extended locking.
+                // Copy the list before calculating statistics to reduce lock duration.
                 List<CompletedTrade> snapshot;
                 lock (currentList) { snapshot = currentList.ToList(); }
 
@@ -159,7 +157,7 @@ namespace MuNTrade.Core.Services
             while (!_cts.Token.IsCancellationRequested)
             {
                 // Simple batch processing
-                if (_paramQueue.TryDequeue(out var trade))
+                if (_paramQueue.TryDequeue(out var trade) && trade is not null)
                 {
                     try
                     {
@@ -170,13 +168,13 @@ namespace MuNTrade.Core.Services
                     {
                         var accountKey = ResolveAccountKey(trade);
                         var strategiesRoot = ResolveStrategiesRoot(accountKey);
-                        var safeKey = ToSafeStrategyKey(ExtractStrategyDisplayName(trade?.StrategyId));
+                        var safeKey = ToSafeStrategyKey(ExtractStrategyDisplayName(trade.StrategyId));
                         var exit = trade.ExitTime == default ? DateTimeOffset.Now : trade.ExitTime;
                         var month = exit.ToString("yyyyMM");
                         var filePath = Path.Combine(strategiesRoot, safeKey, $"{month}.jsonl");
                         _logger.LogError(ex,
                             "Failed to write trade to strategy ledger. StrategyId={StrategyId} SafeKey={SafeKey} Path={Path}",
-                            trade?.StrategyId, safeKey, filePath);
+                            trade.StrategyId, safeKey, filePath);
                     }
                     finally
                     {
@@ -195,7 +193,7 @@ namespace MuNTrade.Core.Services
             // {HistoryDir}\Strategies\{SafeStrategyKey}\{yyyyMM}.jsonl
             var accountKey = ResolveAccountKey(trade);
             var strategiesRoot = ResolveStrategiesRoot(accountKey);
-            var safeKey = ToSafeStrategyKey(ExtractStrategyDisplayName(trade?.StrategyId));
+            var safeKey = ToSafeStrategyKey(ExtractStrategyDisplayName(trade.StrategyId));
             var strategyDir = Path.Combine(strategiesRoot, safeKey);
             Directory.CreateDirectory(strategyDir);
 
@@ -246,25 +244,12 @@ namespace MuNTrade.Core.Services
 
             var s = strategyId.Trim();
 
-            // 1. Remove Instance ID part (after #)
+            // Remove the instance ID suffix.
             var hashIndex = s.IndexOf('#');
             if (hashIndex > 0)
                 s = s.Substring(0, hashIndex);
 
-            // 2. Remove Session ID part if any (after :) - keeping Template ID intact
-            // CAUTION: Some formats might use colons in the ID itself, verify if this is safe.
-            // Assuming standard format "TemplateId:InstanceId" or similar.
-            // If the template ID itself contains dots (Verification.CIS...), we want to KEEP them.
-
-            // The previous logic was:
-            // var colonIndex = s.IndexOf(':'); if > 0 substring...
-            // var dotIndex = s.LastIndexOf('.'); if > 0 substring... <-- THIS WAS THE CULPRIT
-
-            // We will simplify: just strip the dynamic instance suffix (usually after # or maybe :)
-            // If we want to clean up "Verification.CIS.OrbP95.Mur", we should keep it as is.
-
-            // If there is a need to remove namespaces but keep the last meaningful part + variant:
-            // usage: "Verification.CIS.OrbP95.Mur" -> "Verification.CIS.OrbP95.Mur" (No change)
+            // Preserve the template ID after removing the instance suffix.
 
             return string.IsNullOrWhiteSpace(s) ? "UnknownStrategy" : s;
         }
@@ -311,7 +296,7 @@ namespace MuNTrade.Core.Services
             return s;
         }
 
-        // Patch 25: Public API for ViewModel
+        // Public API for UI views.
         public IEnumerable<string> GetStrategyIds()
             => _strategyTrades.Keys.OrderBy(x => x);
 
@@ -376,7 +361,7 @@ namespace MuNTrade.Core.Services
         }
     }
 
-    // Patch 25: Strategy Stats Record
+    // Strategy statistics record.
     public sealed record StrategyStats(
         int TradeCount,
         decimal TotalNetPnL,
@@ -385,7 +370,7 @@ namespace MuNTrade.Core.Services
         DateTime? LastTradeTime
     );
 
-    // Patch 29: Equity Point Record
+    // Equity curve point record.
     public sealed record EquityPoint(DateTime Time, decimal Equity);
 }
 

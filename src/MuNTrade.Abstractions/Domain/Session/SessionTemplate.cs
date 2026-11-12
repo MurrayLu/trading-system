@@ -14,7 +14,7 @@ namespace MuNTrade.Abstractions.Domain.Session
         public bool IsNextDaySession { get; set; }
         public TimeSpan Anchor { get; set; }
 
-        // ★ 新增這兩個屬性以對應 JSON 設定
+        // Session values loaded from JSON configuration.
         public TimeSpan PreCloseAuctionStart { get; set; }
         public TimeSpan PreCloseExtension { get; set; }
     }

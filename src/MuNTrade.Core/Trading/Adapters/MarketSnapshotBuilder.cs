@@ -43,7 +43,7 @@ namespace MuNTrade.Core.Trading.Adapters
         private readonly ConcurrentDictionary<string, long> _lastBoardPublishTicksBySymbol = new(StringComparer.OrdinalIgnoreCase);
         private readonly TimeSpan _minBoardPublishInterval = TimeSpan.FromMilliseconds(200);
 
-        // --- Channel & Worker Infrastructure ---
+        //Channel & Worker Infrastructure ---
         private readonly Channel<SnapshotWorkItem> _channel = Channel.CreateBounded<SnapshotWorkItem>(new BoundedChannelOptions(65_536)
         {
             FullMode = BoundedChannelFullMode.DropOldest,
@@ -56,7 +56,7 @@ namespace MuNTrade.Core.Trading.Adapters
         private CancellationTokenSource? _workerCts;
         private Task? _workerTask;
 
-        // --- Diagnostics ---
+        //Diagnostics ---
         private long _enqueuedCount;
         private long _processedCount;
         private long _snapshotHighWatermarkHits;
@@ -69,12 +69,12 @@ namespace MuNTrade.Core.Trading.Adapters
             public readonly Queue<TradeTickEvent> RecentTicks = new Queue<TradeTickEvent>();
             public readonly int OfiWindowSize = 20;
 
-            // [New] Local OHLC & Vol Tracking
+            // Local OHLC & Vol Tracking
             public decimal Open;
             public decimal High;
             public decimal Low;
             public long CumVolume;
-            public int TradingDayYmd;
+            public int TradingDayYmd = 0;
             public MarketNo MarketNo = MarketNo.Unknown;
             public MarketSource Source = MarketSource.Unknown;
             public string Name = "";

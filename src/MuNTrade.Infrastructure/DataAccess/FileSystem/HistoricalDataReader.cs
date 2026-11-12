@@ -50,7 +50,7 @@ namespace MuNTrade.Infrastructure.DataAccess.FileSystem
                 // 改為 null：尊重類別上的 [JsonPropertyName]，避免編碼產生意外的 camelCase
                 PropertyNamingPolicy = null,
                 WriteIndented = true,
-                // 讀取時容錯大小寫（如果你想保留）可在 Deserialize 時用不同 options
+                // 讀取時容錯大小寫（如果若需保留）可在 Deserialize 時用不同 options
             };
         }
 

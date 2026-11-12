@@ -1,5 +1,4 @@
-﻿// MuNTrade.Core/Services/QuoteStateService.cs
-using MuNTrade.Abstractions.Events.MarketData;
+﻿using MuNTrade.Abstractions.Events.MarketData;
 using MuNTrade.Abstractions.Events.OrderBook;
 using MuNTrade.Abstractions.Dtos.OrderBook;
 using MuNTrade.Abstractions.Domain.OrderBook.Enums;
@@ -53,7 +52,7 @@ namespace MuNTrade.Core.Services
                 return true;
             }
 
-            // [New] 3. Alias Fallback: 處理 TX00AM 映射回 TX00 的情境
+            // 3. Alias Fallback: 處理 TX00AM 映射回 TX00 的情境
             if (symbol.EndsWith("AM", StringComparison.OrdinalIgnoreCase))
             {
                 var baseSymbol = symbol.Substring(0, symbol.Length - 2);

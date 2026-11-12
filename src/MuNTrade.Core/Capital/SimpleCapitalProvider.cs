@@ -16,13 +16,8 @@ namespace MuNTrade.Core.Capital
 
         public CapitalSnapshot GetSnapshot(LedgerKey ledgerKey)
         {
-            // Sync load for now, assuming Repository caches state or fast IO
-            // In real world, this should be cached service
-            var state = _repository.LoadAsync().Result; // Caution: Sync over Async for interface compatibility if GetSnapshot is sync.
-            // Warning: GetSnapshot is defined as synchronous in ICapitalProvider because Risk check is usually sync.
-            // If repository is async, we should cache it. 
-            // For MVP 10C, we assume risk is low or we'll refactor to Async later.
-            // Or better: Use CapitalStateService directly if available, or assume CapitalAllocationService holds state.
+            // The provider interface is synchronous, so the repository load is synchronously awaited.
+            var state = _repository.LoadAsync().Result;
 
             var account = state.Accounts.FirstOrDefault(a => a.Id == ledgerKey.AccountKey)
                        ?? state.Accounts.FirstOrDefault(a => a.Name == ledgerKey.AccountKey);

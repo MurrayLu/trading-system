@@ -46,10 +46,10 @@ namespace MuNTrade.Core.Capital
             TryLoadPathsFromConfig(backtest);
         }
 
-        private static string _customSimPath;
-        private static string _customLivePath;
-        private static string _customTradePath;
-        private static string _customCredentialsPath;
+        private static string _customSimPath = string.Empty;
+        private static string _customLivePath = string.Empty;
+        private static string _customTradePath = string.Empty;
+        private static string _customCredentialsPath = string.Empty;
 
         private static bool TryLoadPathsFromConfig(string settingsPath)
         {
@@ -69,18 +69,18 @@ namespace MuNTrade.Core.Capital
                 if (doc.RootElement.TryGetProperty("DataSourceSettings", out var ds))
                 {
                     // 讀取設定的路徑
-                    if (ds.TryGetProperty("SimAccountDataPath", out var simPath) && !string.IsNullOrWhiteSpace(simPath.GetString()))
+                    if (ds.TryGetProperty("SimAccountDataPath", out var simPath))
                     {
-                        // 如果是絕對路徑，直接用；相對路徑則組合
-                        var resolved = ResolveConfigPath(settingsPath, simPath.GetString());
-                        if (!string.IsNullOrWhiteSpace(resolved))
-                            _customSimPath = resolved;
-                        string p = simPath.GetString();
-                        if (Path.IsPathRooted(p))
+                        var configuredPath = simPath.GetString();
+                        if (!string.IsNullOrWhiteSpace(configuredPath))
                         {
-                            _customSimPath = p;
+                            var resolved = ResolveConfigPath(settingsPath, configuredPath);
+                            if (!string.IsNullOrWhiteSpace(resolved))
+                                _customSimPath = resolved;
+                            if (Path.IsPathRooted(configuredPath))
+                                _customSimPath = configuredPath;
+                            loadedAny = true;
                         }
-                        loadedAny = true;
                     }
 
                     if (ds.TryGetProperty("LiveAccountDataPath", out var livePath) && !string.IsNullOrWhiteSpace(livePath.GetString()))
@@ -100,14 +100,17 @@ namespace MuNTrade.Core.Capital
                     }
                 }
 
-                // [New] Check ExternalFiles for Credentials
+                // Check ExternalFiles for Credentials
                 if (doc.RootElement.TryGetProperty("ExternalFiles", out var ef))
                 {
-                    if (ef.TryGetProperty("CapitalCredentialsPath", out var ccp) && !string.IsNullOrWhiteSpace(ccp.GetString()))
+                    if (ef.TryGetProperty("CapitalCredentialsPath", out var ccp))
                     {
-                        _customCredentialsPath = ccp.GetString();
-                        // external files don't affect data paths, but still count as config
-                        loadedAny = true;
+                        var credentialsPath = ccp.GetString();
+                        if (!string.IsNullOrWhiteSpace(credentialsPath))
+                        {
+                            _customCredentialsPath = credentialsPath;
+                            loadedAny = true;
+                        }
                     }
                 }
 
@@ -221,7 +224,6 @@ namespace MuNTrade.Core.Capital
             acc.LastUpdated = clock.Now;
             // 保存過一次後就不是 FirstSetup
             // (ViewModel 應該控制邏輯，這裡只是純 IO，但為了保險可以加)
-            // if(!acc.IsFirstSetup) acc.IsFirstSetup = false; 
 
             if (!Directory.Exists(ActualSimAccountsPath)) Directory.CreateDirectory(ActualSimAccountsPath);
 
@@ -284,7 +286,7 @@ namespace MuNTrade.Core.Capital
 
         public static void SaveTradeRules(TradeRulesConfig rules)
         {
-            var dir = Path.GetDirectoryName(ActualRulesFile);
+            var dir = Path.GetDirectoryName(ActualRulesFile) ?? TradeRulesPath;
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
             string json = JsonSerializer.Serialize(rules, new JsonSerializerOptions { WriteIndented = true });
@@ -385,7 +387,7 @@ namespace MuNTrade.Core.Capital
             return creds.Accounts.FirstOrDefault(a => string.Equals(a.AccountKey, accountKey, StringComparison.OrdinalIgnoreCase));
         }
 
-        // --- V2 DTOs ---
+        //V2 DTOs ---
         public class V2Credentials
         {
             public int SchemaVersion { get; set; }

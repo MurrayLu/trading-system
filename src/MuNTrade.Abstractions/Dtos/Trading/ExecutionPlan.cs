@@ -2,7 +2,7 @@
 
 namespace MuNTrade.Abstractions.Dtos.Trading
 {
-    // --- 下單意圖/結果（若你已有 OrderRequest / OrderFillEvent，可做 adapter） ---
+    //下單意圖/結果（若已有 OrderRequest / OrderFillEvent，可做 adapter） ---
     public sealed record ExecutionPlan(
         int Quantity,                   // 張數或股數（配合 LotSize）
         OrderType OrderType,

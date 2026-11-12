@@ -34,9 +34,9 @@ namespace MuNTrade.Core.StrategyRuntime.Routing
         // Bounded Concurrency: Limit concurrent deliveries to prevent ThreadPool starvation with many strategies
         private readonly SemaphoreSlim _deliveryThrottler = new(16);
 
-        // 10B-1: Ingress Whitelist moved to MarketIngressUniverse - [Removed]
+        // The ingress whitelist is defined by MarketIngressUniverse.
 
-        // 10B: Explicit Egress Types (Guard against wiring violations)
+        // Explicit Egress Types (Guard against wiring violations)
         private static readonly Type[] ExplicitEgressTypes = new[]
         {
             typeof(StrategyPacketEmittedEvent),
@@ -56,7 +56,7 @@ namespace MuNTrade.Core.StrategyRuntime.Routing
             // Pit 1: Link token
             _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-            // 10B-2: Router only subscribes to Whitelisted Events explicitly (No SubscribeAll)
+            // Router only subscribes to Whitelisted Events explicitly (No SubscribeAll)
             foreach (var type in MuNTrade.Core.Eventing.MarketIngressUniverse.All)
             {
                 if (type == typeof(TradeTickEvent)) _subscriptions.Add(_eventBus.Subscribe<TradeTickEvent>(OnIngress));
@@ -121,7 +121,7 @@ namespace MuNTrade.Core.StrategyRuntime.Routing
             return Task.CompletedTask;
         }
 
-        // Diagnostic Counters (user request Step 2)
+        // Diagnostic counters.
         private long _dbgKlineClosedCount;
         private long _dbgIndUpdatedCount;
         private string _dbgLastIndInfo = "";
@@ -151,14 +151,14 @@ namespace MuNTrade.Core.StrategyRuntime.Routing
                 _dbgLastIndInfo = $"{iue.Symbol}|{iue.Period}";
             }
 
-            // 10B-3: Strict wiring violation check (Outer Shell)
+            // Strict wiring violation check (Outer Shell)
             if (IsExplicitEgress(evt))
             {
                 LogWiringViolationThrottled(evt.GetType());
                 return;
             }
 
-            // 10B-1/10B-2: Strict Ingress Type Gate (supports envelope payload)
+            // Strict Ingress Type Gate (supports envelope payload)
             if (!TryGetIngressPayloadType(evt, out var payloadType))
             {
                 return;
@@ -190,19 +190,19 @@ namespace MuNTrade.Core.StrategyRuntime.Routing
                 if (ct.IsCancellationRequested) break;
                 var s = statuses[i];
 
-                // 10A/10B: Runtime Gate (Double check, though snapshot handles it mostly)
+                // Runtime Gate (Double check, though snapshot handles it mostly)
                 if (s.RuntimeState != StrategyRuntimeState.Running)
                     continue;
 
-                // 10B-5: Strategy Subscription Check (O(1) Versioned)
+                // Strategy Subscription Check (O(1) Versioned)
                 if (!IsStrategySubscribed(s, payloadType))
                     continue;
 
-                // [New] 12-2: Spec Filtering (Symbol/TF/Ind)
+                // Spec Filtering (Symbol/TF/Ind)
                 if (!AcceptBySpec(s, evt))
                     continue;
 
-                // 10B-4: Envelope Origin Check (Future Defense)
+                // Envelope Origin Check (Future Defense)
                 if (evt is EventEnvelope env && env.Producer == "StrategyEgress")
                     continue;
 
@@ -262,7 +262,7 @@ namespace MuNTrade.Core.StrategyRuntime.Routing
             return false;
         }
 
-        // [New] 12-2: Spec Filtering Helper
+        // Spec Filtering Helper
         private static bool AcceptBySpec(StrategyInstanceStatus s, IMuEvent evt)
         {
             var spec = s.IngressSpec;

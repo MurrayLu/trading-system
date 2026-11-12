@@ -33,7 +33,7 @@ namespace MuNTrade.Abstractions.Events.System
         public bool IsAlerted { get; set; }                // 是否為注意/警示股 (未來可擴充)
         public bool IsDisposal { get; set; }               // 是否為處置股 (未來可擴充)
 
-        // ★★★ 新增資券與當沖欄位 (Phase 2 Requirement) ★★★
+        // Margin, short-sale, and day-trading data.
         public double MarginRatio { get; set; }            // 融資成數 (e.g. 60)
         public double ShortRatio { get; set; }             // 融券成數 (e.g. 90)
         public bool IsDayTradeAvailable { get; set; }      // 是否可現沖
@@ -56,7 +56,7 @@ namespace MuNTrade.Abstractions.Events.System
         public double PreCollectionRatio { get; set; }     // 款券預收成數
         public bool IsPreCollection { get; set; }          // 是否需款券預收
 
-        // ★★★ 這是本次需要新增的關鍵欄位 ★★★
+        // Indicates whether day trading is available.
         /// <summary>
         /// 價格最小跳動單位 (Tick)。
         /// 注意：對於台股，這應該是動態的。這裡可以放一個初始值或最常見的值。

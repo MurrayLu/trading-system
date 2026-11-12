@@ -1,5 +1,4 @@
-﻿// MuNTrade.Abstractions/Interfaces/Services/IWarmupPlanner.cs
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace MuNTrade.Abstractions.Contracts.Warmup
 {
@@ -15,12 +14,12 @@ namespace MuNTrade.Abstractions.Contracts.Warmup
         IEnumerable<WarmupPlan> GetPlans(string symbol);
     }
 
-    /// <summary>預設規劃（你可換成設定檔）。</summary>
+    /// <summary>預設規劃（可換成設定檔）。</summary>
     public sealed class SimpleWarmupPlanner : IWarmupPlanner
     {
         public IEnumerable<WarmupPlan> GetPlans(string symbol)
         {
-            // 你可依實務調整（重點是 bars 與 days 分開定義）
+            // 可依實務調整（重點是 bars 與 days 分開定義）
             yield return new WarmupPlan { TimeframeKey = "Time_1", RequiredBars = 360, RequiredDays = 30 };
             yield return new WarmupPlan { TimeframeKey = "Time_5", RequiredBars = 360, RequiredDays = 60 };
             yield return new WarmupPlan { TimeframeKey = "Time_60", RequiredBars = 360, RequiredDays = 90 };

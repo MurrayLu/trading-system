@@ -39,7 +39,7 @@ namespace MuNTrade.Core.StrategyRuntime.Hosting
         public IStrategy Strategy => _strategy;
 
         private readonly string _accountKey;
-        public string AccountKey => _accountKey; // [10C] Pinned Key
+        public string AccountKey => _accountKey; // Pinned Key
 
         // Strict Lifecycle State
         public StrategyRuntimeState State

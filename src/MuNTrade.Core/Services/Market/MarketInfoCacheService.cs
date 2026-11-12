@@ -76,54 +76,6 @@ namespace MuNTrade.Core.Services.Market
             return MarketInfo.Unknown(symbol);
         }
 
-        // Patch A: Throttling & Counting
-        private readonly ConcurrentDictionary<string, long> _lastWarnTicks = new(StringComparer.OrdinalIgnoreCase);
-        private long _legacyGetCalls;
-        private long _legacyLastReportTicks;
-        private static readonly long WarnIntervalTicks = TimeSpan.FromSeconds(30).Ticks;
-        private static readonly long ReportIntervalTicks = TimeSpan.FromSeconds(60).Ticks;
-
-        /// <summary>
-        /// [Obsolete] 請改用 TryGetMarketInfo 或 GetMarketInfoOrThrow
-        /// </summary>
-        [Obsolete("Use TryGetMarketInfo (UI) or GetMarketInfoOrThrow (Risk/Execution) instead.")]
-        public MarketInfo GetMarketInfo(string symbol)
-        {
-            // 1. Count global calls
-            Interlocked.Increment(ref _legacyGetCalls);
-
-            // 2. Report aggregate every 60s
-            var now = DateTime.UtcNow.Ticks;
-            var lastReport = Interlocked.Read(ref _legacyLastReportTicks);
-            if (now - lastReport > ReportIntervalTicks &&
-                Interlocked.CompareExchange(ref _legacyLastReportTicks, now, lastReport) == lastReport)
-            {
-                var count = Interlocked.Exchange(ref _legacyGetCalls, 0);
-                if (count > 0)
-                {
-                    _logger.LogWarning("[MarketInfo] Legacy GetMarketInfo calls in last 60s = {Count}", count);
-                }
-            }
-
-            if (string.IsNullOrWhiteSpace(symbol)) return MarketInfo.Unknown("");
-
-            if (_cache.TryGetValue(symbol, out var info))
-            {
-                return info;
-            }
-
-            // 3. Throttle per-symbol warning (30s)
-            var lastWarn = _lastWarnTicks.GetOrAdd(symbol, 0);
-            if (now - lastWarn > WarnIntervalTicks)
-            {
-                // Simple race condition acceptable here (last writer wins)
-                _lastWarnTicks[symbol] = now;
-                _logger.LogWarning("[MarketInfo] StrictMode(UI legacy): Unknown MarketNo for {Symbol}.", symbol);
-            }
-
-            return MarketInfo.Unknown(symbol);
-        }
-
         /// <summary>
         /// 從持倉快照載入市場資訊（啟動時 warm cache）。
         /// </summary>

@@ -35,7 +35,7 @@
             DailyLossRemaining = dailyLossRemaining;
         }
 
-        // --- 以下為輔助方法 (Factory Methods)，讓程式碼更易讀 ---
+        //以下為輔助方法 (Factory Methods)，讓程式碼更易讀 ---
 
         /// <summary>
         /// 建立一個「核准」的決策。

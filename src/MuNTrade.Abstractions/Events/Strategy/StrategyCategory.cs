@@ -8,6 +8,6 @@
         State,       // State machine transitions
         Risk,        // Risk management checks
         Debug,       // Internal diagnostics
-        System       // [10C] System level events (e.g. Probe)
+        System       // System level events (e.g. Probe)
     }
 }

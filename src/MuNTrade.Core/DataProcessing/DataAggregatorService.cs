@@ -94,7 +94,7 @@ namespace MuNTrade.Core.DataProcessing
 
         private void ProcessTickForConfig(TickData tick, AggregatorState state)
         {
-            // 依 config 決定是否時間棒或 tick 棒（保留你原邏輯）
+            // 依 config 決定是否時間棒或 tick 棒（保留原邏輯）
             if (!state.CurrentBars.TryGetValue(tick.StockId, out var currentBar))
             {
                 currentBar = CreateFirstBar(state.Config, tick);
@@ -112,7 +112,7 @@ namespace MuNTrade.Core.DataProcessing
                 // 直接對照「這根的固定 EndTime」
                 if (tick.ExchangeTs >= currentBar.EndTime) isBarClosed = true;
             }
-            else // Tick 型（若你還有用）
+            else // Tick-bar aggregation.
             {
                 if (currentBar.TickCount >= state.Config.Period) isBarClosed = true;
             }
@@ -128,13 +128,13 @@ namespace MuNTrade.Core.DataProcessing
             }
         }
 
-        // ---------------- 小工具：時間對齊 ----------------
+        //小工具：時間對齊 ----------------
 
         private static DateTime TruncateToMinute(DateTime dt)
             => new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, 0, dt.Kind);
 
         /// <summary>
-        /// 傳回「從 startTime 起算，下一個 period 邊界」；等價你原本的 GetTimeBarEndTime。
+        /// 傳回「從 startTime 起算，下一個 period 邊界」；等價既有的 GetTimeBarEndTime。
         /// </summary>
         private static DateTime GetTimeBarEndTime(DateTime startTime, int timeFrameMinutes)
         {
@@ -143,7 +143,7 @@ namespace MuNTrade.Core.DataProcessing
             return new DateTime(aligned + periodTicks, startTime.Kind);
         }
 
-        // ---------------- 建 Bar：改用 FromSnapshot（避免寫入 private setter） ----------------
+        //建 Bar：改用 FromSnapshot（避免寫入 private setter） ----------------
 
         private DynamicBar CreateFirstBar(BarConfig cfg, TickData tick)
         {
@@ -164,7 +164,7 @@ namespace MuNTrade.Core.DataProcessing
             else
             {
                 // Tick 型：以第一筆 tick 時間作為起始；EndTime 暫時用 start+period「分」只是佔位
-                // 如果你 Tick 型的 period 是「幾筆」，EndTime 其實不重要；只在關棒才輸出。
+                // 若 Tick 型的 period 是「幾筆」，EndTime 其實不重要；只在關棒才輸出。
                 var start = tick.ExchangeTs.Value;
                 var end = start.AddMinutes(cfg.Period);
                 var p = tick.Price;

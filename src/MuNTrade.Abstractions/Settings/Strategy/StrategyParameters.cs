@@ -1,5 +1,4 @@
-﻿// MuNTrade.Abstractions/Settings/StrategyParameters.cs  (extended)
-using MuNTrade.Abstractions.Domain.Trading.Enums;
+﻿using MuNTrade.Abstractions.Domain.Trading.Enums;
 using MuNTrade.Abstractions.Domain.MarketData.Enums;
 using MuNTrade.Abstractions.Domain.Common.Enums;
 
@@ -10,7 +9,6 @@ namespace MuNTrade.Abstractions.Settings.Strategy
     /// It is frozen for compatibility only.
     /// Do not add new Daytrade governance or AI adapter features here.
     /// </summary>
-    [Obsolete("Legacy strategy parameter bag. Do not use for Daytrade parameter governance.")]
     public record StrategyParameters
     {
         // 事件 E1
@@ -28,7 +26,7 @@ namespace MuNTrade.Abstractions.Settings.Strategy
         // 事件 E5
         public double D2 { get; init; } = 15.0;
 
-        // 你新增/優化要用的欄位 ↓
+        // 擴充欄位 ↓
         public int TickLimitBase { get; init; } = 100;
         public long VolumeLimit { get; init; } = 10000;
 

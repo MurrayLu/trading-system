@@ -9,7 +9,7 @@ using MuNTrade.Abstractions.Domain.Optimization;
 using MuNTrade.Abstractions.Domain.Session;
 using MuNTrade.Abstractions.Contracts.Hubs;
 using MuNTrade.Abstractions.Contracts.Trading;
-using MuNTrade.Abstractions.Contracts.Market; // [New]
+using MuNTrade.Abstractions.Contracts.Market;
 using MuNTrade.Abstractions.Contracts.Capital;
 using MuNTrade.Core.Trading.Adapters;
 using System;
@@ -26,7 +26,6 @@ using MuNTrade.Abstractions.Events.Strategy;
 namespace MuNTrade.Core.Services
 {
     /// <summary>
-    /// ★★★ 新架構的核心指揮官 ★★★
     /// 負責：接收訊號 -> 計算差異 -> 呼叫風控 -> 呼叫執行 -> 更新倉位。
     /// </summary>
     public class PositionManagerService : IPositionManagerService
@@ -83,8 +82,7 @@ namespace MuNTrade.Core.Services
 
         public Position GetCurrentPosition(string stockId)
         {
-            // PositionManagerService only manages "Real" positions implicitly in this context, 
-            // or we might need to be more specific. For now, we return the position or empty.
+            // Returns the stored position or an empty position for this symbol.
             if (_positions.TryGetValue(stockId, out var pos)) return pos;
             return new Position { StockId = stockId };
         }
@@ -156,7 +154,7 @@ namespace MuNTrade.Core.Services
 
             if (tradeQuantity == 0) return;
 
-            // Patch 10: Create Execution Trace
+            // Create the execution trace.
             var stratId = signal.StrategyId ?? "Unknown";
             var accKey = signal.AccountKey ?? "Live:SKCOM:Unknown:Unknown";
             var trace = new ExecutionTrace
@@ -366,7 +364,7 @@ namespace MuNTrade.Core.Services
                 var f = ResolveFutureSpec(symbol, rules);
                 if (f != null)
                 {
-                    // 修正：手續費為雙邊 (round-trip)，因此單邊需除以 2
+                    // The configured fee is round-trip, so charge half per side.
                     // 參考使用者說明：TX00 設定 200，單邊應收 100
                     return (f.FeePerOrder / 2m) * Math.Abs(qty);
                 }

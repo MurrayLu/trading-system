@@ -41,15 +41,15 @@ namespace MuNTrade.Abstractions.Events.System
         public DateTimeOffset OccurredAt { get; init; }
         public string? CorrelationId { get; init; }
 
-        // ★ P0-1 結構化失敗欄位
+        // Structured failure details.
         public FailureKind FailureKind { get; init; } = FailureKind.Unknown;
         public FailureScope FailureScope { get; init; } = FailureScope.SymbolLifecycle;
         public FailureStage Stage { get; init; } = FailureStage.Activation;
-        
+
         public bool ShouldRetry { get; init; }
         public bool ShouldRemoveBoard { get; init; }
         public bool ShouldDisableSymbol { get; init; }
-        
+
         public string BrokerActionTaken { get; init; } = "None";
         public int RetryDelayMs { get; init; }
         public int Attempt { get; init; }

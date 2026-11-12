@@ -27,8 +27,8 @@ namespace MuNTrade.Core.Settings
 
         /// <summary>
         /// 控制要 publish 哪些 type 的 partial。
-        /// - 空陣列或 null 表示允許所有 type（預設行為）。
-        /// - 若設定為 e.g. ["Day","Week","Month"]，則會只發這些 type 的 partial（Time 會被過濾掉）。
+        ///空陣列或 null 表示允許所有 type（預設行為）。
+        ///若設定為 e.g. ["Day","Week","Month"]，則會只發這些 type 的 partial（Time 會被過濾掉）。
         /// </summary>
         public string[] PartialPublishTypes { get; set; } = new string[0];
 

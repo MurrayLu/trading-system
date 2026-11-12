@@ -89,9 +89,9 @@ namespace MuNTrade.Core.DataProcessing.Store
             }
         }
 
-        // ----------------------
+
         // 以下為補齊的方法（interface 要求）
-        // ----------------------
+
         public void MarkTfReady(string symbol, string timeframe) => _ready[(symbol, timeframe)] = true;
 
         public bool IsTfReady(string symbol, string timeframe)
@@ -114,7 +114,7 @@ namespace MuNTrade.Core.DataProcessing.Store
                 _ready.TryRemove(kv, out _);
         }
 
-        // 這個方法供你在關棒時寫回 open bar 狀態；你已有其他寫回點也行
+        // 這個方法供在關棒時寫回 open bar 狀態；已有其他寫回點也行
         public void UpsertOpenBar(DynamicBar bar)
         {
             if (bar.Config is null) return;

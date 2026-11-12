@@ -154,8 +154,8 @@ public sealed class IndicatorCalculatorService : IIndicatorCalculator, IDisposab
 
                 foreach (var ind in list)
                 {
-                    // 讓指標自我初始化，並回傳它算好的歷史序列 (SMA returned here)
-                    var partial = ind.Initialize(req.Symbol, tf, bars);
+                    var historyBars = bars ?? Array.Empty<JsonKLineRecord>();
+                    var partial = ind.Initialize(req.Symbol, tf, historyBars);
                     if (partial != null)
                     {
                         foreach (var kv in partial)
@@ -207,7 +207,6 @@ public sealed class IndicatorCalculatorService : IIndicatorCalculator, IDisposab
                 return;
             }
 
-            // ★★★ 核心修改：發布事件時，附上 bar 物件 ★★★
             Publish(new IndicatorsUpdatedEvent
             {
                 OccurredAt = new DateTimeOffset(_clock.Now),

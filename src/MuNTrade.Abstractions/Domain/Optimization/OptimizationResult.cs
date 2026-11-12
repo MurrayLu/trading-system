@@ -20,27 +20,26 @@ namespace MuNTrade.Abstractions.Domain.Optimization
     /// </summary>
     public class OptimizationResult
     {
-        // --- 識別與績效 ---
-        public string JobId { get; set; }
+        //識別與績效 ---
+        public string JobId { get; set; } = string.Empty;
         public double NetPnL { get; set; }   // 原本的淨利
-        public double GrossPnL { get; set; }   // 新增：毛利
+        public double GrossPnL { get; set; }
         public double Sharpe { get; set; }
-        public int TotalTrades { get; set; } // 新增：總交易次數
+        public int TotalTrades { get; set; }
         public double WinRate { get; set; }
 
-        // ★ 新增：用於記錄該次 Job 所使用的策略參數 ★
+        // Strategy parameters used by this optimization job.
         public double D1 { get; set; }
         public int N1 { get; set; }
         public int SL { get; set; }
         public int TP { get; set; }
-        // ★ 2. 新增 TradingMode 屬性
         public TradingMode TradingMode { get; set; }
 
         public OptimizationResult(OptimizationJob job, BacktestPerformance performance)
         {
-            JobId = job.JobId;
+            JobId = job.JobId ?? string.Empty;
             NetPnL = (double)performance.NetPnL;
-            GrossPnL = (double)performance.GrossPnL; // ★★★ 就是加上這一行 ★★★
+            GrossPnL = (double)performance.GrossPnL;
             Sharpe = performance.SharpRatio;
             TotalTrades = performance.Trades;
             WinRate = performance.WinRate;
@@ -58,7 +57,6 @@ namespace MuNTrade.Abstractions.Domain.Optimization
             if (job.StrategyParamOverrides.TryGetValue(nameof(StrategyParameters.TP), out var tpVal))
                 TP = Convert.ToInt32(tpVal);
 
-            // ★ 3. 新增對 TradingMode 的解析
             if (job.StrategyParamOverrides.TryGetValue(nameof(StrategyParameters.TradingMode), out var modeVal))
                 TradingMode = (TradingMode)modeVal;
         }

@@ -12,7 +12,7 @@ namespace MuNTrade.Abstractions.Contracts.Strategy
         Task StopInstanceAsync(StrategyInstanceId instanceId, CancellationToken cancellationToken = default);
         IEnumerable<IStrategy> GetActiveInstances();
         IEnumerable<StrategyInstanceStatus> GetInstanceStatuses();
-        // Refined 10B: Hot Path Snapshot (Zero Allocation)
+        // Hot Path Snapshot (Zero Allocation)
         IReadOnlyList<StrategyInstanceStatus> GetRunningInstanceSnapshot();
         ValueTask DeliverAsync(StrategyInstanceId instanceId, IMuEvent evt, CancellationToken cancellationToken = default);
         void ReportStrategyCrash(StrategyInstanceId instanceId, Exception ex);

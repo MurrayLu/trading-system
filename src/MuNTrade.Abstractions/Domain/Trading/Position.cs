@@ -1,7 +1,6 @@
 ﻿using System;
 using MuNTrade.Abstractions.Domain.Common.Enums;
 
-// ★ 核心修改：將 class 改為 record，並將 set 改為 init
 // init 表示這個屬性只能在物件初始化時被賦值
 namespace MuNTrade.Abstractions.Domain.Trading
 {
@@ -21,7 +20,7 @@ namespace MuNTrade.Abstractions.Domain.Trading
         public string AccountKey { get; init; } = "";
         public string EntryCorrelationId { get; init; } = "";
 
-        // [Step 3] 新增：市場真相寫入快照
+        // Snapshot written by the market state source.
         public MarketNo MarketNo { get; init; } = MarketNo.Unknown;
         public MarketSource Source { get; init; } = MarketSource.Domestic;
     }

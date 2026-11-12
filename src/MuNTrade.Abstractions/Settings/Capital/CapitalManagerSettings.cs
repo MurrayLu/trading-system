@@ -1,5 +1,4 @@
-﻿// 建議路徑: MuNTrade.Abstractions/Settings/CapitalManagerSettings.cs
-
+﻿
 namespace MuNTrade.Abstractions.Settings.Capital
 {
     public enum SizingMode

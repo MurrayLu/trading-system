@@ -103,7 +103,6 @@ namespace MuNTrade.Core.Backtesting
             }
         }
 
-        [Obsolete("Legacy backtest request override path. Transitional only.")]
         private void ApplyRequestOverrides(BacktestRunRequest request)
         {
             var backtest = _backtestSettings.CurrentValue;

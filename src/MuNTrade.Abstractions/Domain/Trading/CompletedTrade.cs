@@ -1,5 +1,4 @@
-﻿// 檔案路徑: MuNTrade.Abstractions/Domain/Models/CompletedTrade.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 using MuNTrade.Abstractions.Domain.Trading.Enums;
 using MuNTrade.Abstractions.Domain.MarketData.Enums;
@@ -8,7 +7,6 @@ using MuNTrade.Abstractions.Domain.Common.Enums;
 namespace MuNTrade.Abstractions.Domain.Trading
 {
     /// <summary>
-    /// 【升級後版本】
     /// 代表一筆完整的、已平倉的交易紀錄。
     /// </summary>
     public class CompletedTrade
@@ -24,7 +22,6 @@ namespace MuNTrade.Abstractions.Domain.Trading
         public decimal NetPnL { get; set; }
 
         /// <summary>
-        /// ★ 核心修改：使用 OrderSide 代表此筆交易的整體方向。
         /// Buy = 作多 (先買後賣)
         /// Sell = 作空 (先賣後買)
         /// </summary>
@@ -34,7 +31,7 @@ namespace MuNTrade.Abstractions.Domain.Trading
         public string EntryReason { get; set; } = string.Empty;
         public string ExitReason { get; set; } = string.Empty;
 
-        public string Account { get; set; } = "Real"; // [New] Distinguish Real vs Paper
+        public string Account { get; set; } = "Real"; // Distinguish Real vs Paper
         public string StrategyId { get; set; } = "";
         public string AccountKey { get; set; } = "";
         public string EntryCorrelationId { get; set; } = "";

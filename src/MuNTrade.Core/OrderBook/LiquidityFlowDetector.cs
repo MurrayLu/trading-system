@@ -145,8 +145,8 @@ namespace MuNTrade.Core.OrderBook
                         if (shiftedTowards) { s.Shifted = true; s.ShiftedAt = now; }
 
                         // Publish Suppressed Event for New Level ONLY if not caused by Shift AND volume > Threshold
-                        // [Fix] If shiftedTowards is true, this "new level" is likely just existing depth we moved into.
-                        // [Fix] Also enforce addFloor to avoid spamming 1-lot new levels.
+                        // If shiftedTowards is true, this "new level" is likely just existing depth we moved into.
+                        // Also enforce addFloor to avoid spamming 1-lot new levels.
                         if (!shiftedTowards && vol > addFloor)
                         {
                             events.Add(new BigHangEvent(_symbol, isBid, new ArrivalTs(now), null, vol, flowStats, false, lvl.Price, LiquidityGuardReason.NewLevel, true)

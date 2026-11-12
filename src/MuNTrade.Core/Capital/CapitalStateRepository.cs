@@ -43,7 +43,7 @@ namespace MuNTrade.Core.Capital
                 {
                     foreach (var acc in creds.Accounts)
                     {
-                        if (acc.Broker != null && 
+                        if (acc.Broker != null &&
                             (string.IsNullOrEmpty(acc.Broker.Mode) || acc.Broker.Mode.Equals("Real", System.StringComparison.OrdinalIgnoreCase)))
                         {
                             state.Accounts.Add(new AccountProfile

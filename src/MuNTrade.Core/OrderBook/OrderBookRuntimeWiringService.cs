@@ -190,7 +190,7 @@ namespace MuNTrade.Core.OrderBook
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[OrderBookObs] runtime lane crashed");
-                throw; // ★ 讓 RunWithRestartAsync 感知
+                throw; //  讓 RunWithRestartAsync 感知
             }
         }
 

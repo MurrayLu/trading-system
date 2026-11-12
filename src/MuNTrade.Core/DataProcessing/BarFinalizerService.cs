@@ -35,10 +35,9 @@ public class BarFinalizerService : BackgroundService
         {
             // normal shutdown
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            // TODO: log real error
-            // _logger?.LogError(ex, "BarFinalizerService 發生未預期的錯誤。");
+            // Unexpected exceptions stop the service; this class has no logger.
         }
         finally
         {

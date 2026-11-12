@@ -41,16 +41,11 @@ namespace MuNTrade.Abstractions.Contracts.Market
         MarketInfo GetMarketInfoOrThrow(string symbol, MarketInfoPurpose purpose);
 
         /// <summary>
-        /// [Obsolete] 請改用 TryGetMarketInfo 或 GetMarketInfoOrThrow
-        /// </summary>
-        /// <summary>
         /// Warm the cache from trusted sources (position snapshot / instrument master).
         /// Must NOT be called from UI rendering paths.
         /// </summary>
         void UpsertFromSnapshot(string symbol, MuNTrade.Abstractions.Domain.Common.Enums.MarketNo marketNo, MuNTrade.Abstractions.Domain.Common.Enums.MarketSource source);
 
-        [Obsolete("Use TryGetMarketInfo (UI) or GetMarketInfoOrThrow (Risk/Execution) instead.")]
-        MarketInfo GetMarketInfo(string symbol);
     }
 }
 

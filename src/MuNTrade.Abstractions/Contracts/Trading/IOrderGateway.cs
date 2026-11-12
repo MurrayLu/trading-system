@@ -27,7 +27,7 @@ namespace MuNTrade.Abstractions.Contracts.Trading
         /// </summary>
         Task<decimal> GetBuyingPowerAsync(string symbol);
 
-        // --- 掛單管理 (Order Management) ---
+        //掛單管理 (Order Management) ---
 
         /// <summary>
         /// 依序號刪單 (Cancel Order By SeqNo)
@@ -64,7 +64,7 @@ namespace MuNTrade.Abstractions.Contracts.Trading
         /// </summary>
         Task<string> DecreaseOrderBySeqNoAsync(string seqNo, int reduceQty);
 
-        // --- 海期管理 (Overseas Future) ---
+        //海期管理 (Overseas Future) ---
 
         Task<string> OverSeaCancelOrderBySeqNoAsync(string seqNo);
         Task<string> OverSeaCancelOrderByBookNoAsync(string bookNo);

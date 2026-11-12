@@ -71,6 +71,7 @@ namespace MuNTrade.Infrastructure.DataAccess.Rankings
 
         private async Task<(List<StockListItem> Listing, List<StockListItem> Otc)> DownloadFromSkcomAsync(CancellationToken ct)
         {
+            var capitalApi = _capitalApi ?? throw new InvalidOperationException("SKCOM 未連線。請確認連線正常後再下載。");
             var listingMap = new Dictionary<string, StockListItem>(StringComparer.OrdinalIgnoreCase);
             var otcMap = new Dictionary<string, StockListItem>(StringComparer.OrdinalIgnoreCase);
             var issuanceMap = LoadIssuanceMap();
@@ -120,11 +121,11 @@ namespace MuNTrade.Infrastructure.DataAccess.Rankings
                 }
             }
 
-            _capitalApi.StockListDataReceived += Handle;
+            capitalApi.StockListDataReceived += Handle;
             try
             {
-                _ = Task.Run(() => _capitalApi.RequestStockList(0), ct);
-                _ = Task.Run(() => _capitalApi.RequestStockList(1), ct);
+                _ = Task.Run(() => capitalApi.RequestStockList(0), ct);
+                _ = Task.Run(() => capitalApi.RequestStockList(1), ct);
 
                 var timeout = Task.Delay(TimeSpan.FromSeconds(15), ct);
                 var allDone = Task.WhenAll(listingTcs.Task, otcTcs.Task);
@@ -141,7 +142,7 @@ namespace MuNTrade.Infrastructure.DataAccess.Rankings
             }
             finally
             {
-                _capitalApi.StockListDataReceived -= Handle;
+                capitalApi.StockListDataReceived -= Handle;
             }
         }
 

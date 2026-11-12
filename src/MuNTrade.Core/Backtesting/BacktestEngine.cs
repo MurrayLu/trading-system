@@ -1,5 +1,4 @@
-﻿// 檔案路徑: MuNTrade.Core/Backtesting/BacktestEngine.cs
-
+﻿
 using Microsoft.Extensions.Logging;
 using MuNTrade.Abstractions.Domain.MarketData;
 using MuNTrade.Abstractions.Domain.Trading;
@@ -39,10 +38,9 @@ namespace MuNTrade.Core.Backtesting
         private readonly IPositionManagerService _positionManager;
         private readonly SessionFilterService _sessionFilter;
         private readonly KLineBuilderService _klineBuilder;
-        private readonly TradeLoggerService _tradeLogger; // ★ 新增：用於計算最終績效
+        private readonly TradeLoggerService _tradeLogger;
         private readonly IEventBus _eventBus;
 
-        // ★ 核心變化：不再直接依賴 OrderExecutionService 或 StrategyEngineService。
         // BacktestEngine 的職責是驅動數據流，而其他服務會自己訂閱事件來工作。
 
         public BacktestEngine(
@@ -52,7 +50,7 @@ namespace MuNTrade.Core.Backtesting
             IPositionManagerService positionManager,
             SessionFilterService sessionFilter,
             KLineBuilderService klineBuilder,
-            TradeLoggerService tradeLogger, // ★ 新增
+            TradeLoggerService tradeLogger,
             IEventBus eventBus)
         {
             _clock = clock;
@@ -65,11 +63,8 @@ namespace MuNTrade.Core.Backtesting
             _eventBus = eventBus;
         }
 
-        /// <summary>
-        /// ★ 修正：方法簽章與 IBacktestEngine 介面完全一致
-        /// </summary>
-        public async Task<BacktestPerformance> RunAsync( // ★ 修正回傳類型為 BacktestPerformance
-            IEnumerable<BacktestSegment> segments, // ★ 修正參數類型為 BacktestSegment
+        public async Task<BacktestPerformance> RunAsync(
+            IEnumerable<BacktestSegment> segments,
             CancellationToken ct = default)
         {
             _logger.LogInformation("--- Starting Full Backtest Run ---");
@@ -78,14 +73,11 @@ namespace MuNTrade.Core.Backtesting
             {
                 if (ct.IsCancellationRequested) break;
 
-                // ★ 修正：使用 BacktestSegment 的 Symbol 和 Date 屬性
                 _logger.LogInformation("--- Starting Segment for {StockId} on {Date} ---", segment.Symbol, segment.Date);
 
-                // ★ 修正：根據 ITickSource 介面，組合 DateTime 參數
                 var fromTime = segment.Date.ToDateTime(segment.From);
                 var toTime = segment.Date.ToDateTime(segment.To);
 
-                // ★ 修正：使用 ITickSource 的正確方法 StreamTicksAsync
                 await foreach (var tick in _tickSource.StreamTicksAsync(segment.Symbol, fromTime, toTime, ct))
                 {
                     _clock.AdvanceTo(tick.ExchangeTs.Value);
@@ -109,7 +101,6 @@ namespace MuNTrade.Core.Backtesting
                 _logger.LogInformation("--- Full Backtest Run Finished ---");
             }
 
-            // ★ 修正：返回由 TradeLoggerService 計算出的真實績效物件
             return _tradeLogger.CalculatePerformance();
         }
 
@@ -132,7 +123,7 @@ namespace MuNTrade.Core.Backtesting
                     StockId = pos.StockId,
                     SignalTime = _clock.Now,
                     Price = pos.LastPrice,
-                    TargetPositionRatio = 0.0m, // ★ 目標：0% 部位，即空手
+                    TargetPositionRatio = 0.0m, //  目標：0% 部位，即空手
                     Reason = "BacktestForceClose"
                 };
 

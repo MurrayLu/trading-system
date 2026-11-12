@@ -27,23 +27,11 @@ namespace MuNTrade.Abstractions.Events.MarketData
         public ExchangeTs ExchangeTs { get; set; }
 
         /// <summary>
-        /// [Obsolete] 請改用 ExchangeTs。
-        /// </summary>
-        [Obsolete("Use ExchangeTs instead.")]
-        public DateTime Timestamp { get => ExchangeTs.Value; set => ExchangeTs = new ExchangeTs(value); }
-
-        /// <summary>
-        /// [新增] 本機接收時間 (Arrival Time / Broker Time)。
+        /// 本機接收時間 (Arrival Time / Broker Time)。
         /// 用途：與 Best5 (五檔) 進行時間配對 (Joining)。
-        /// 特性：這是你的電腦收到資料的時間，與 Best5 的時間基準一致。
+        /// 特性：這是本機收到資料的時間，與 Best5 的時間基準一致。
         /// </summary>
         public ArrivalTs ArrivalTs { get; set; }
-
-        /// <summary>
-        /// [Obsolete] 請改用 ArrivalTs。
-        /// </summary>
-        [Obsolete("Use ArrivalTs instead.")]
-        public DateTime ArrivalTimestamp { get => ArrivalTs.Value; set => ArrivalTs = new ArrivalTs(value); }
 
         public MarketNo MarketNo { get; set; }
         public MarketSource Source { get; set; } = MarketSource.Domestic; // 預設國內，避免舊程式碼未初始化出錯
@@ -55,7 +43,7 @@ namespace MuNTrade.Abstractions.Events.MarketData
         public int TimeMillisMicros { get; set; }
 
         public decimal Price { get; set; }
-        public int Volume { get; set; }  // ★ 單筆量 int
+        public int Volume { get; set; }  //  單筆量 int
 
         public bool IsSimulated { get; set; }
         public decimal BidAtTrade { get; set; }

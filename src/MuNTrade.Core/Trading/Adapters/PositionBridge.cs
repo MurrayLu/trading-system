@@ -1,5 +1,4 @@
-// 建議路徑: MuNTrade.Core/Trading/Adapters/PositionBridge.cs (最終修正版)
-using Microsoft.Extensions.DependencyInjection; // ★ 核心修改：引用 DI 服務提供者
+using Microsoft.Extensions.DependencyInjection;
 using MuNTrade.Abstractions.Domain.MarketData;
 using MuNTrade.Abstractions.Domain.Trading;
 using MuNTrade.Abstractions.Domain.Capital;
@@ -15,7 +14,6 @@ namespace MuNTrade.Core.Trading.Adapters
     {
         private readonly IEventBus _bus;
 
-        // ★ 核心修改 1：將 oldPositionManager 改為可為 null (nullable)
         private readonly IPositionManagerService? _oldPositionManager;
 
         /// <summary>
@@ -27,7 +25,6 @@ namespace MuNTrade.Core.Trading.Adapters
         {
             _bus = bus;
 
-            // ★ 核心修改 2：使用 GetService<T> 來「可選地」解析服務。
             // 如果 IPositionManagerService 在當前模式下沒有被註冊，GetService 會返回 null，
             // 而不會像 GetRequiredService 那樣拋出例外。
             _oldPositionManager = serviceProvider.GetService<IPositionManagerService>();
@@ -38,12 +35,9 @@ namespace MuNTrade.Core.Trading.Adapters
 
         private void OnFill(OrderFillEvent fill)
         {
-            // ★ 核心修改：兩邊的 PositionManager 都已經在建構子中直接訂閱 _eventBus.Subscribe<OrderFillEvent> 了，
             // 這裡再主動呼叫 UpdatePositionOnFill 會導致部位雙倍計算 (下 2 張變 4 張的 Bug)。
             // 因此將這行註解掉，避免重複派送成交事件。
-            // _oldPositionManager?.UpdatePositionOnFill(fill);
 
-            // TODO: 未來，這裡也會更新你新的 IPositionManager (若有需要)
         }
     }
 }

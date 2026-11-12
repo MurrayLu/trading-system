@@ -40,12 +40,6 @@ namespace MuNTrade.Core.Backtesting
             return MarketInfo.Unknown(symbol ?? string.Empty);
         }
 
-        public MarketInfo GetMarketInfo(string symbol)
-        {
-            TryGetMarketInfo(symbol, out var info);
-            return info;
-        }
-
         public void UpsertFromSnapshot(string symbol, MarketNo marketNo, MarketSource source)
         {
             if (string.IsNullOrWhiteSpace(symbol) || marketNo == MarketNo.Unknown) return;

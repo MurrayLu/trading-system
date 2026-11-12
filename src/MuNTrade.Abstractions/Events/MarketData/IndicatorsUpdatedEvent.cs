@@ -20,9 +20,6 @@ namespace MuNTrade.Abstractions.Events.MarketData
         public ExchangeTs ExchangeTs { get; init; }
         public ArrivalTs ArrivalTs { get; init; }
 
-        [Obsolete("Use ExchangeTs or ArrivalTs")]
-        public DateTime Timestamp { get => ExchangeTs.Value != default ? ExchangeTs.Value : ArrivalTs.Value; init => ExchangeTs = new ExchangeTs(value); }
-
         /// <summary>例：{""sma20"": 123.45m, ""atr14"": 1.23m, ""bias"": 0.56m}</summary>
         public IReadOnlyDictionary<string, decimal> Values { get; init; } = new Dictionary<string, decimal>();
 

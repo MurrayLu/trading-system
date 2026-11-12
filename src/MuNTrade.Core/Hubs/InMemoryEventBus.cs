@@ -1,5 +1,4 @@
-﻿// 建議路徑: MuNTrade.Core/Hubs/InMemoryEventBus.cs
-using MuNTrade.Abstractions.Contracts.Hubs;
+﻿using MuNTrade.Abstractions.Contracts.Hubs;
 using System;
 using System.Collections.Concurrent;
 
@@ -56,7 +55,7 @@ namespace MuNTrade.Core.Hubs
                     // 執行委派。
                     ((Action<TEvent>)handlerDelegate)(@event);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // 例外隔離：捕獲單一訂閱者的錯誤，防止中斷整個回呼鏈。
                     // 建議在此處加入日誌紀錄，以便追蹤有問題的訂閱者。

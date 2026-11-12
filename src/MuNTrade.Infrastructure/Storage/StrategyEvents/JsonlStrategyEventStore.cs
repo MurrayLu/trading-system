@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using MuNTrade.Abstractions.Contracts.Eventing;
 using MuNTrade.Abstractions.Contracts.Strategy;
 using MuNTrade.Abstractions.Contracts.Time;
@@ -36,15 +37,14 @@ namespace MuNTrade.Infrastructure.Storage.StrategyEvents
 
             var json = JsonSerializer.Serialize(wrapper, new JsonSerializerOptions { WriteIndented = false });
 
-            // Should optimize with buffer/channel in production, using simple file append for MVP
+            // Events are appended to the daily JSONL file.
             await File.AppendAllTextAsync(file, json + Environment.NewLine, ct);
         }
 
-        public async IAsyncEnumerable<IMuEvent> ReadTailAsync(StrategyInstanceId id, int n, CancellationToken ct = default)
+        public async IAsyncEnumerable<IMuEvent> ReadTailAsync(StrategyInstanceId id, int n, [EnumeratorCancellation] CancellationToken ct = default)
         {
-            // Simple implementation: Read all and take last N. 
-            // In prod: Read from end of file.
-            var date = new DateTimeOffset(_clock.Now).ToString("yyyyMMdd"); // Note: only reads today for MVP
+            // Read the current day's file and retain the most recent requested events.
+            var date = new DateTimeOffset(_clock.Now).ToString("yyyyMMdd");
             var file = Path.Combine(_basePath, id.Value, $"{date}.jsonl");
 
             if (!File.Exists(file)) yield break;
@@ -62,8 +62,6 @@ namespace MuNTrade.Infrastructure.Storage.StrategyEvents
                     var doc = JsonDocument.Parse(lines[i]);
                     var typeName = doc.RootElement.GetProperty("Type").GetString();
 
-                    // MVP Type Resolution: Scan known assemblies or use simple switch
-                    // For robust impl: Use Type.GetType or TypeMap
                     Type? targetType = ResolveTypeInternal(typeName);
                     if (targetType != null)
                     {

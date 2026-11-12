@@ -1,4 +1,3 @@
-﻿// 檔案路徑: MuNTrade.Core/Services/EventWiringService.cs (新增檔案)
 
 using Microsoft.Extensions.Hosting;
 using MuNTrade.Abstractions.Contracts.Trading;

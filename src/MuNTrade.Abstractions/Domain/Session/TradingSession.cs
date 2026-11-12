@@ -10,11 +10,10 @@ namespace MuNTrade.Abstractions.Domain.Session
         public DateTime EndTime { get; }   // 13:30
         public TimeSpan Anchor { get; }   // 09:00
 
-        // ★ 新增兩個欄位：收盤集合競價起點 & 允許延伸多久
+        // Closing auction start and extension duration.
         public TimeSpan PreCloseAuctionStart { get; }   // 13:25
         public TimeSpan PreCloseExtension { get; }   // 00:01 (→ 13:26)
 
-        /* 新增：這段 Session 應落在哪一天的「交易日」帳務 */
         public DateOnly TradeDate { get; }
 
         public TradingSession(DateTime st, DateTime et,

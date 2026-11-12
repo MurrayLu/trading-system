@@ -50,7 +50,7 @@ namespace MuNTrade.Core.Settings
         public string Start { get; set; } = "09:00:00";
         public string End { get; set; } = "09:15:00";
 
-        // ★ 請確保這兩個屬性存在，且名稱對應 appsettings.json
+        //  請確保這兩個屬性存在，且名稱對應 appsettings.json
         public string NightStart { get; set; } = "15:00:00";
         public string NightEnd { get; set; } = "15:30:00";
     }

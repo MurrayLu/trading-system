@@ -26,7 +26,6 @@ namespace MuNTrade.Core.Trading
 {
     public class LiveOrderExecutionService : ITradeExecutionManager
     {
-        // ★ 核心修改：依賴 IOrderGateway 而不是任何具體的券商服務
         private readonly IOrderGateway _gateway;
         private readonly IEventBus _eventBus;
         private readonly ILogger<LiveOrderExecutionService> _logger;
@@ -34,7 +33,7 @@ namespace MuNTrade.Core.Trading
         private readonly IClock _clock;
 
         public LiveOrderExecutionService(
-            IOrderGateway gateway, // ★ 核心修改：注入 IOrderGateway
+            IOrderGateway gateway,
             IEventBus eventBus,
             ILogger<LiveOrderExecutionService> logger,
             IExecutionTraceRegistry traceRegistry,
@@ -65,7 +64,7 @@ namespace MuNTrade.Core.Trading
                     $"Blocked non-live intent (FeedKind={intent.FeedKind}). Only realtime signals are allowed.");
             }
 
-            // --- Safety Gate: only allow near-real-time intents ---
+            //Safety Gate: only allow near-real-time intents ---
             // Prevent history replay or reconnection bursts from triggering orders.
             var now = _clock.Now;
             var createdAt = intent.CreatedAt.Value;
@@ -84,22 +83,19 @@ namespace MuNTrade.Core.Trading
                 }
             }
 
-            // --- 步驟 1: 前置檢查 ---
-            // IOrderGateway 內部應負責連線狀態的檢查，這裡可以簡化。
-            // 如果需要，可以在 IOrderGateway 介面加上 CurrentState 屬性。
-            // 為保持此服務的純粹性，我們假設 Gateway 會處理。
+            //步驟 1: 前置檢查 ---
+            // The gateway owns connection state checks.
 
             try
             {
-                // --- 步驟 2: 將 OrderIntent 翻譯成 OrderRequest ---
-                // 這部分的邏輯與之前完全相同，因為它是這個服務的核心職責。
+                // Translate the intent into an order request.
                 var signal = new SignalEvent
                 {
                     StockId = intent.Symbol,
                     SignalTime = intent.CreatedAt.Value,
                     Price = intent.Plan.LimitPrice.GetValueOrDefault(0),
                     Reason = intent.CorrelationId,
-                    Tag = "Slice1_Entry",
+                    Tag = "Entry",
                     TargetPositionRatio = (intent.Side == OrderSide.Buy) ? 1.0m : -1.0m,
                     StrategyId = intent.StrategyId,
                     AccountKey = intent.AccountKey
@@ -132,19 +128,18 @@ namespace MuNTrade.Core.Trading
                 _logger.LogInformation("Submitting order via Gateway for {Symbol}: {Side} {Qty} @ {Price}",
                     intent.Symbol, request.Side, request.Quantity, request.OriginalSignal.Price);
 
-                // --- 步驟 3: ★ 核心修改：呼叫 IOrderGateway 執行證券下單 ★ ---
                 string gatewayResponse = await _gateway.PlaceStockOrderAsync(request);
 
                 _logger.LogInformation("Gateway response for {Symbol}: {Response}", intent.Symbol, gatewayResponse);
 
-                // --- 步驟 4: 根據 Gateway 回應，返回初步結果 ---
+                //步驟 4: 根據 Gateway 回應，返回初步結果 ---
                 // 這裡的邏輯與之前相同，但現在我們知道回應來自一個通用的閘道，而不是特定券商。
                 bool accepted = !gatewayResponse.StartsWith("ERR:", StringComparison.OrdinalIgnoreCase)
                     && !gatewayResponse.Contains("失敗")
                     && !gatewayResponse.Contains("無法");
 
                 var result = new OrderResult(
-                    OrderId: intent.CorrelationId,
+                    OrderId: intent.CorrelationId ?? string.Empty,
                     Accepted: accepted,
                     FullyFilled: false,
                     FilledQuantity: 0,
@@ -164,8 +159,7 @@ namespace MuNTrade.Core.Trading
         public Task CancelAsync(string orderId, CancellationToken ct = default)
         {
             _logger.LogInformation("CancelAsync called for OrderId: {OrderId}. Not yet implemented.", orderId);
-            // TODO: 實作呼叫 IOrderGateway 的取消訂單方法
-            // await _gateway.CancelStockOrderAsync(orderId, ct);
+            // This adapter logs cancellation requests but does not call a gateway cancellation method.
             return Task.CompletedTask;
         }
     }

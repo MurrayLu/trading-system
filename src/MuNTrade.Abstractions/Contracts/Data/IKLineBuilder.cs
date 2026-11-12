@@ -32,8 +32,8 @@ namespace MuNTrade.Abstractions.Contracts.Data
         void UnregisterConfiguration(BarConfig config);
 
         /// <summary>
-        /// 【重要新增】清空所有商品、所有週期下，還在聚合中的 Bar。
-        /// 主要用於回測模式結束時，確保數據完整性。
+        /// Flushes all bars that are still being aggregated across symbols and periods.
+        /// Used at the end of a backtest to complete the data stream.
         /// </summary>
         void FlushOpenBars();
 
@@ -44,14 +44,12 @@ namespace MuNTrade.Abstractions.Contracts.Data
         void FlushOpenBars(string stockId);
 
         /// <summary>
-        /// 【重要新增 for Clock-Driven】
-        /// 由外部時鐘（如 BarFinalizerService）呼叫，
-        /// 強制關閉所有結束時間早於指定時間點的 Bar。
+        /// Closes bars whose end time is earlier than the specified cutoff.
         /// </summary>
         /// <param name="cutoff">截止時間</param>
         void FlushBarsExpiredBefore(ExchangeTs cutoff);
 
-        // ★ 新增：由外部（Service/Pipeline）在啟動時「接上」正在進行中的那根
+        // Seeds the current bar during service startup.
         void SeedCurrentBar(string symbol, BarConfig cfg, DynamicBar snapshot);
     }
 }

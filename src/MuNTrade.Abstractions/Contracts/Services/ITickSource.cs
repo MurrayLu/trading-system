@@ -1,5 +1,4 @@
-﻿// MuNTrade.Abstractions/Interfaces/Services/ITickSource.cs (乾淨的介面定義)
-
+﻿
 using MuNTrade.Abstractions.Domain.MarketData;
 using MuNTrade.Abstractions.Domain.Trading;
 using MuNTrade.Abstractions.Domain.Capital;

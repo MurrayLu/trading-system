@@ -1,5 +1,4 @@
-﻿// MuNTrade.Core/DataProcessing/TickStream/TickStreamHub.cs
-// ★ R2: OnTick 完整脫鉤 EventBus 同步鏈
+﻿//  OnTick 完整脫鉤 EventBus 同步鏈
 //        callback 只做 TryWrite（真正無鎖 O(1)），ring buffer 維護在獨立 worker
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -17,7 +16,7 @@ using System.Threading.Tasks;
 namespace MuNTrade.Core.DataProcessing.TickStream
 {
     /// <summary>
-    /// ★ R2: TickStreamHub 完整脫鉤 EventBus 同步鏈。
+    ///  TickStreamHub 完整脫鉤 EventBus 同步鏈。
     /// OnTick callback 只做 Channel.TryWrite（無鎖，幾百奈秒）。
     /// ring buffer 維護、GetOrAdd 全部移到獨立的 background worker。
     /// </summary>
@@ -77,7 +76,7 @@ namespace MuNTrade.Core.DataProcessing.TickStream
         }
 
         /// <summary>
-        /// ★ R2 核心：EventBus 同步鏈中唯一執行的程式碼。
+        /// Handles the TickStreamHub work on the synchronous EventBus path.
         /// 只做一次 TryWrite，無鎖、無 GetOrAdd、無 ring 操作。
         /// 耗時：幾百奈秒。
         /// </summary>

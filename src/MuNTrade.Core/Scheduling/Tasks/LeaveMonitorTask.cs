@@ -34,7 +34,7 @@ namespace MuNTrade.Core.Scheduling.Tasks
             var duration = _options.EnterMonitorTime - _options.LeaveMonitorTime;
             if (duration <= TimeSpan.Zero)
                 duration = TimeSpan.FromMinutes(90);
-            _api.SuspendReconnect(duration, "LeaveMonitor"); 
+            _api.SuspendReconnect(duration, "LeaveMonitor");
             _api.LeaveMonitor();
             return Task.CompletedTask;
         }

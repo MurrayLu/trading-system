@@ -110,7 +110,7 @@ public class FileTickPlayer : ITickSource
             }
 
             // B. Migration fallback：只在 TickAllowReadLivePartialFiles = true 且正式 .gz 不存在時
-            //    才讀取舊版遺留的 .csv.part（此格式在新版 recorder 中不再產生）
+            // Read legacy .csv.part files for compatibility; the current recorder does not create them.
             string sessionPart = Path.Combine(symbolDir, prefix + ".csv.part");
             if (_settings.TickAllowReadLivePartialFiles && File.Exists(sessionPart))
             {

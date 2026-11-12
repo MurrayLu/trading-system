@@ -1,4 +1,3 @@
-// MuNTrade.Core/Services/OrderExecutionService.cs (解耦最終版)
 
 using Microsoft.Extensions.Logging;
 using MuNTrade.Abstractions.Domain.MarketData;
@@ -6,14 +5,14 @@ using MuNTrade.Abstractions.Domain.Trading;
 using MuNTrade.Abstractions.Domain.Capital;
 using MuNTrade.Abstractions.Domain.Optimization;
 using MuNTrade.Abstractions.Domain.Session;
-using MuNTrade.Abstractions.Contracts.Hubs; // ★ 新增 IEventBus 引用
+using MuNTrade.Abstractions.Contracts.Hubs;
 using MuNTrade.Abstractions.Contracts.Trading;
 using MuNTrade.Core.Backtesting;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MuNTrade.Abstractions.Contracts.Market; // For IMarketInfoProvider
-using MuNTrade.Abstractions.Domain.Common.Enums; // [Fix] MarketKind
+using MuNTrade.Abstractions.Domain.Common.Enums; // MarketKind
 
 namespace MuNTrade.Core.Services
 {
@@ -23,7 +22,7 @@ namespace MuNTrade.Core.Services
         private readonly TradeLoggerService _tradeLogger;
         private readonly ILogger<OrderExecutionService> _logger;
         private readonly MuNTrade.Abstractions.Contracts.Brokers.ICapitalApiService _capitalApi;
-        private readonly IPaperOrderGateway _paperGateway; // [New]
+        private readonly IPaperOrderGateway _paperGateway;
         private readonly IMarketInfoProvider _marketInfoProvider; // [SOP-Strict]
 
         public OrderExecutionService(
@@ -69,21 +68,15 @@ namespace MuNTrade.Core.Services
 
             var stockId = request.OriginalSignal.StockId ?? "";
 
-            // [SOP-Strict] Use Pinned MarketKind from Request
+            // Use the market kind pinned to the request.
             if (request.MarketKind == MarketKind.Unknown)
             {
-                // Fallback or Error? 10C Strict says Error.
-                // But for safety, we can re-resolve if missing? 
-                // User request says: "throw new InvalidOperationException".
-                // Let's stick to the Pinned Truth.
-                // If the upstream (PositionManager) didn't set it, it's a bug there.
-                // However, we can perform a last-mile check/resolve if we want to be nice, 
-                // but checking the user request "should change to: if (intent.MarketKind == MarketKind.Unknown) throw".
+                // Reject unknown markets before order submission.
+
                 _logger.LogError("[OrderExecution] OrderRequest missing MarketKind (Unknown). Rejecting {Symbol}", stockId);
-                return; // Or throw inside the Task?
+                return;
             }
 
-            // Trust the Pinned Kind
             bool isFuture = request.MarketKind == MarketKind.Derivatives;
 
             Task.Run(async () =>
@@ -91,8 +84,7 @@ namespace MuNTrade.Core.Services
                 try
                 {
                     string result;
-                    // Check Gateway capabilities? Assuming Gateway interface has both.
-                    // Just in case, confirm if PlaceFutureOrderAsync exists on ICapitalApiService.
+                    // The gateway interface exposes both order cancellation methods.
                     // MainViewModel Mock had it.
                     if (isFuture)
                         result = await _capitalApi.PlaceFutureOrderAsync(request);
@@ -120,7 +112,7 @@ namespace MuNTrade.Core.Services
                 try
                 {
                     string result;
-                    // [10C] Use Pinned MarketKind from Request
+                    // Use Pinned MarketKind from Request
                     if (request.MarketKind == MarketKind.Unknown)
                     {
                         _logger.LogError("[OrderExecution] OrderRequest missing MarketKind (Unknown). Rejecting {Symbol}", request.OriginalSignal.StockId);

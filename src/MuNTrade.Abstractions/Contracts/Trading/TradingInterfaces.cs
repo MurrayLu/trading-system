@@ -48,7 +48,7 @@ namespace MuNTrade.Abstractions.Contracts.Trading
         Task<IReadOnlyList<MissedOpportunity>> QueryAsync(string symbol, DateTime from, DateTime to, CancellationToken ct = default);
     }
 
-    // ===== 下單執行器（可用你現有 IOrderExecutionService 做 Adapter 實作）=====
+    // ===== 下單執行器（可用現有 IOrderExecutionService 做 Adapter 實作）=====
     public interface ITradeExecutionManager
     {
         Task<OrderResult> SubmitAsync(OrderIntent intent, CancellationToken ct = default);

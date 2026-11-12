@@ -14,7 +14,6 @@ namespace MuNTrade.Core.Backtesting
         Error = 5
     }
 
-    [Obsolete("Legacy backtest request. Do not use for Daytrade entry.")]
     public sealed record BacktestRunRequest
     {
         public string ReportMode { get; init; } = "C2";

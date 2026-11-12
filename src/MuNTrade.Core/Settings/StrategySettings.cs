@@ -1,5 +1,4 @@
-﻿// MuNTrade.Core/Settings/StrategySettings.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace MuNTrade.Core.Settings

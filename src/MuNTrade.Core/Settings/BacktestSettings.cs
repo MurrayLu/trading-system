@@ -24,7 +24,7 @@ namespace MuNTrade.Core.Settings
         /// </summary>
         public StrategyParameters StrategyParameters { get; set; } = new();
 
-        // --- Backtest Host Extensions ---
+        //Backtest Host Extensions ---
         public string UniverseMode { get; set; } = "SingleSymbol"; // SingleSymbol | TurnoverList
         public string TimeMode { get; set; } = "Range";            // SingleDay | Range
         public string ReportMode { get; set; } = "C2";             // C1 | C2

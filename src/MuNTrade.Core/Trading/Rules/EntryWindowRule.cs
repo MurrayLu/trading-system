@@ -1,4 +1,3 @@
-﻿// 檔案路徑: MuNTrade.Core/Trading/Rules/EntryWindowRule.cs (修正後)
 
 using Microsoft.Extensions.Options;
 using MuNTrade.Abstractions.Domain.MarketData;
@@ -28,14 +27,12 @@ namespace MuNTrade.Core.Trading.Rules
         }
 
         /// <summary>
-        /// ★★★ 核心修改 1：方法的參數從 SignalEvent 改為 OrderRequest ★★★
         /// </summary>
         /// <summary>
-        /// ★★★ 核心修改：Evaluate 現在接收 currentPosition 參數 ★★★
         /// </summary>
         public RiskDecision Evaluate(OrderRequest request, Position currentPosition)
         {
-            // ★★★ 智慧判斷：如果不是開新倉，則本規則不適用，直接批准 ★★★
+            //  智慧判斷：如果不是開新倉，則本規則不適用，直接批准
             // 這可以避免在盤末阻止停損單等平倉訊號的執行。
             if (currentPosition.Quantity != 0)
             {

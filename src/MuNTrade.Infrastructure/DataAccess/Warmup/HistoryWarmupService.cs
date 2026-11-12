@@ -1,5 +1,4 @@
-﻿// MuNTrade.Infrastructure/Services/HistoryWarmupService.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,7 +46,7 @@ namespace MuNTrade.Infrastructure.DataAccess.Warmup
         }
 
         /// <summary>
-        /// 主暖機流程： 
+        /// 主暖機流程：
         /// 1) 依 planner 取得每個 timeframe 的 WarmupPlan
         /// 2) 讀取 coverage (manifest)，若無則重掃
         /// 3) 計算缺口 (ComputeMissingByDay) —— 以「交易日曆 + 交易時段」計算 LCD
@@ -88,7 +87,7 @@ namespace MuNTrade.Infrastructure.DataAccess.Warmup
             }
             else
             {
-                // fallback：保守啟發式（和你原先的一致）
+                // fallback：保守啟發式（和既有的一致）
                 afterSessionEnd = nowLocal.TimeOfDay >= new TimeSpan(14, 0, 0);
             }
 
@@ -120,18 +119,16 @@ namespace MuNTrade.Infrastructure.DataAccess.Warmup
                     DateOnly start;
                     DateOnly downloadEnd; // 實際要傳給 downloader 的結束日
 
-                    bool hasCoverage = cov != null && cov.From != null && cov.To != null;
-
-                    if (hasCoverage)
+                    if (cov?.From is DateOnly coverageFrom && cov.To is DateOnly coverageTo)
                     {
                         // 判斷 gap 在 coverage 的哪一側
-                        bool gapIsLeft = originalGapTo < cov.From;   // 缺在 coverage 左側（更早的歷史）
-                        bool gapIsRight = originalGapFrom > cov.To;  // 缺在 coverage 右側（更新到最新的日）
+                        bool gapIsLeft = originalGapTo < coverageFrom;   // 缺在 coverage 左側（更早的歷史）
+                        bool gapIsRight = originalGapFrom > coverageTo;  // 缺在 coverage 右側（更新到最新的日）
 
                         if (gapIsLeft)
                         {
                             // 若缺早期歷史（left-gap），只下載缺失區間（但以月份為單位對齊）
-                            // 因為你所有週期都是按月份存檔，所以對齊到月份首/末，確保每個月檔案是完整的
+                            // 因為所有週期都是按月份存檔，所以對齊到月份首/末，確保每個月檔案是完整的
                             start = new DateOnly(originalGapFrom.Year, originalGapFrom.Month, 1);
                             var lastDay = DateTime.DaysInMonth(originalGapTo.Year, originalGapTo.Month);
                             downloadEnd = new DateOnly(originalGapTo.Year, originalGapTo.Month, lastDay);
@@ -170,7 +167,7 @@ namespace MuNTrade.Infrastructure.DataAccess.Warmup
                         }
                         else if (plan.TimeframeKey.Equals("Week", StringComparison.OrdinalIgnoreCase))
                         {
-                            // 原本可能對齊到週，但既然存檔以月為單位，對齊到月份首更合理
+                            // Align the requested range to the first day of the month for monthly storage.
                             var candidate = lcd.AddDays(-(requiredBars - 1) * 7);
                             candidateStart = new DateOnly(candidate.Year, candidate.Month, 1);
                         }

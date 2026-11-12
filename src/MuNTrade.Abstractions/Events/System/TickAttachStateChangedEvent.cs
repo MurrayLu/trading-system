@@ -8,7 +8,7 @@ namespace MuNTrade.Abstractions.Events.System
     {
         public DateTimeOffset OccurredAt { get; init; } = DateTimeOffset.Now;
         public string Symbol { get; init; } = "";
-        
+
         /// <summary>
         /// None, Attaching, Attached, RetryPending, Failed, Disabled
         /// 枚舉可以定義在 MuNTrade.Abstractions.Domain.MarketData.Enums 中或重用 string

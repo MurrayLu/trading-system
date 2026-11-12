@@ -12,7 +12,6 @@ namespace MuNTrade.Abstractions.Contracts.Trading
     /// It is frozen for compatibility only and is not an official Daytrade governed entry.
     /// AI adapters must not depend on this service.
     /// </summary>
-    [Obsolete("Legacy strategy parameter service. Do not use for Daytrade parameter governance.")]
     public interface IStrategyParamService
     {
         StrategyParamSchema GetSchema(string strategyId);

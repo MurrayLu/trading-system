@@ -109,7 +109,7 @@ namespace MuNTrade.Core.Indicators.KLine.CISD
             private decimal _potentialTopPrice = 0;
             private decimal _potentialBottomPrice = 0;
 
-            // ★ Optimization: Store values directly, not indices
+            //  Optimization: Store values directly, not indices
             // Bullish Pullback Anchor Values (for creating Bearish Level)
             private decimal _anchorBotLow = 0;
             private decimal _anchorBotPrevLow = 0;

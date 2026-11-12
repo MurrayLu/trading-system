@@ -1,4 +1,3 @@
-﻿// MuNTrade.Infrastructure/DataAccess/Exporters/CsvResultExporter.cs (v7.5 - 扁平化修正版)
 
 using CsvHelper;
 using MuNTrade.Abstractions.Domain.MarketData;
@@ -46,13 +45,13 @@ namespace MuNTrade.Infrastructure.DataAccess.Exporters
             using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
 
             csv.WriteField("JobId");
-            csv.WriteField("GrossPnl"); 
+            csv.WriteField("GrossPnl");
             csv.WriteField("NetPnl");
             csv.WriteField("Sharpe");
             csv.WriteField("TotalTrades");
             csv.WriteField("WinRate");
-            csv.WriteField(nameof(OptimizationResult.TradingMode)); // <-- 新增
-            // -- Strategy Params --
+            csv.WriteField(nameof(OptimizationResult.TradingMode));
+            //Strategy Params --
             csv.WriteField(nameof(OptimizationResult.D1));
             csv.WriteField(nameof(OptimizationResult.N1));
             csv.WriteField(nameof(OptimizationResult.SL));
@@ -69,8 +68,8 @@ namespace MuNTrade.Infrastructure.DataAccess.Exporters
                 csv.WriteField(r.Sharpe);
                 csv.WriteField(r.TotalTrades);
                 csv.WriteField(r.WinRate);
-                csv.WriteField(r.TradingMode.ToString()); // <-- 新增 (使用 .ToString() 轉為字串)
-                // -- Strategy Params --
+                csv.WriteField(r.TradingMode.ToString());
+                //Strategy Params --
                 csv.WriteField(r.D1);
                 csv.WriteField(r.N1);
                 csv.WriteField(r.SL);

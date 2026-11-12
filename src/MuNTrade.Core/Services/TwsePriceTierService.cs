@@ -11,12 +11,12 @@ namespace MuNTrade.Core.Services
     /// 台灣證券交易所 (TWSE) 的股價跳動單位/級距服務。
     ///
     /// 注意：
-    /// - TickSizeAtPrice(price) = 「此價位所屬級距的 tick」
-    /// - NextUp/NextDown = 「從此價位往上/往下一檔的合法價位」
+    ///TickSizeAtPrice(price) = 「此價位所屬級距的 tick」
+    ///NextUp/NextDown = 「從此價位往上/往下一檔的合法價位」
     ///
     /// 在級距邊界 (例如 1000)：
-    /// - NextUp(1000) = 1005
-    /// - NextDown(1000) = 999
+    ///NextUp(1000) = 1005
+    ///NextDown(1000) = 999
     /// </summary>
     public class TwsePriceTierService : IPriceTierService
     {
@@ -87,9 +87,9 @@ namespace MuNTrade.Core.Services
             return p;
         }
 
-        // ----------------------
+
         // Internal helpers
-        // ----------------------
+
 
         private enum MoveDirection { Up, Down }
 
@@ -112,7 +112,7 @@ namespace MuNTrade.Core.Services
                             return rules[idx - 1].TickSize;
 
                         // 如果 idx==0 表示已經在最底層級距下界，再往下就還是用本級距 tick
-                        // （你也可以改成 throw，視你的系統規則）
+                        // （也可以改成 throw，視既有 系統規則）
                         return rule.TickSize;
                     }
 
@@ -129,22 +129,18 @@ namespace MuNTrade.Core.Services
             return GetFallbackTickSize(price);
         }
 
-        private List<TickRule> GetNormalizedRulesOrNull()
+        private List<TickRule>? GetNormalizedRulesOrNull()
         {
-            // 你原本的型別是 _options.CurrentValue.StockRules.TickRules
-            // 這裡假設 TickRules 的元素型別有 MinPrice/MaxPrice/TickSize 三個欄位。
-
             var raw = _options.CurrentValue?.StockRules?.TickRules;
             if (raw == null || raw.Count == 0) return null;
 
-            // ✅排序，避免 FirstOrDefault 因為順序錯而命中錯誤區間
+            // Sort rules so the matching price band is selected deterministically.
             var rules = raw
                 .Select(r => new TickRule(r.MinPrice, r.MaxPrice, r.TickSize))
                 .OrderBy(r => r.MinPrice)
                 .ToList();
 
             // ✅（可選但我強烈建議）做基本防呆：避免重疊/反向/空 tick
-            // ValidateRules(rules); // 暫時註解，避免與現有 config 衝突導致崩潰，但建議未來開啟
 
             return rules;
         }
@@ -183,9 +179,9 @@ namespace MuNTrade.Core.Services
             }
         }
 
-        // ----------------------
+
         // Fallback (hard-coded TWSE)
-        // ----------------------
+
 
         private static decimal GetFallbackTickSize(decimal price)
         {

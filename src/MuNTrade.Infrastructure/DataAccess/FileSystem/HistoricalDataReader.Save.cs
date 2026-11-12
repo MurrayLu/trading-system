@@ -1,5 +1,4 @@
-﻿// MuNTrade.Infrastructure/DataAccess/FileSystem/HistoricalDataReader.Save.cs
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using MuNTrade.Abstractions.Domain.MarketData;
 using MuNTrade.Abstractions.Domain.Trading;
 using MuNTrade.Abstractions.Domain.Capital;
@@ -20,7 +19,7 @@ namespace MuNTrade.Infrastructure.DataAccess.FileSystem
     {
         /// <summary>
         /// 以「格式 B」儲存月度檔案（每筆為 KlineTime/Open/High/Low/Close/Qty）
-        /// 這會把內部的 JsonKLineRecord 轉換成你要的 canonical B schema，並落地為月度檔案。
+        /// 這會把內部的 JsonKLineRecord 轉換成指定的 canonical B schema，並落地為月度檔案。
         /// </summary>
         public async Task SaveMonthlyRollingAsync(
             string stockId,
@@ -62,7 +61,7 @@ namespace MuNTrade.Infrastructure.DataAccess.FileSystem
 
                 if (!isCurrentMonth)
                 {
-                    // 過去已封閉月份：強制使用整個月（1日 ~ 月末）作為檔名區間（你的保險）
+                    // 過去已封閉月份：強制使用整個月（1日 ~ 月末）作為檔名區間（既有 保險）
                     fileFrom = monthStart;
                     fileTo = monthEndCalendar;
                 }

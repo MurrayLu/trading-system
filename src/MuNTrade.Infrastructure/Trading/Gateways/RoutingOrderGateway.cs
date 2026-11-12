@@ -8,8 +8,8 @@ namespace MuNTrade.Infrastructure.Trading.Gateways
 {
     /// <summary>
     /// 同一個 process 同時支援 Sim 與 Live：
-    /// - request.AccountKey 以 "Sim:" 開頭 => Paper
-    /// - request.AccountKey 以 "Live:" 開頭 => Live
+    ///request.AccountKey 以 "Sim:" 開頭 => Paper
+    ///request.AccountKey 以 "Live:" 開頭 => Live
     /// </summary>
     public sealed class RoutingOrderGateway : IOrderGateway
     {
@@ -31,7 +31,6 @@ namespace MuNTrade.Infrastructure.Trading.Gateways
         {
             if (string.IsNullOrWhiteSpace(accountKey))
             {
-                // _log.LogWarning("[RoutingOrderGateway] Missing AccountKey, default to PAPER.");
                 return _paper;
             }
 
@@ -58,7 +57,7 @@ namespace MuNTrade.Infrastructure.Trading.Gateways
         public Task<decimal> GetBuyingPowerAsync(string symbol)
             => _paper.GetBuyingPowerAsync(symbol);
 
-        // --- IOrderGateway Implementation (Order Management is not supported here) ---
+        //IOrderGateway Implementation (Order Management is not supported here) ---
 
         public Task<string> CancelOrderBySeqNoAsync(string seqNo)
             => ThrowOmsRequired(nameof(CancelOrderBySeqNoAsync));
@@ -81,7 +80,7 @@ namespace MuNTrade.Infrastructure.Trading.Gateways
         public Task<string> DecreaseOrderBySeqNoAsync(string seqNo, int reduceQty)
             => ThrowOmsRequired(nameof(DecreaseOrderBySeqNoAsync));
 
-        // --- Overseas ---
+        //Overseas ---
         public Task<string> OverSeaCancelOrderBySeqNoAsync(string seqNo)
             => ThrowOmsRequired(nameof(OverSeaCancelOrderBySeqNoAsync));
 

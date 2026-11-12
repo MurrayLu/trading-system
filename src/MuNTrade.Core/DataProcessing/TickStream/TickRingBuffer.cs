@@ -1,5 +1,4 @@
-﻿// MuNTrade.Core/DataProcessing/TickStream/TickRingBuffer.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace MuNTrade.Core.DataProcessing.TickStream

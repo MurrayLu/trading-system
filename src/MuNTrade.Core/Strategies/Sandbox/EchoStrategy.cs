@@ -15,7 +15,6 @@ namespace MuNTrade.Core.Strategies.Sandbox
 
         private readonly IStrategyRuntimeContext _context;
         private CancellationTokenSource? _cts;
-        private Task? _loopTask;
 
         public EchoStrategy(StrategyInstanceId instanceId, StrategyTemplateId templateId, IStrategyRuntimeContext context)
         {
@@ -60,10 +59,6 @@ namespace MuNTrade.Core.Strategies.Sandbox
             if (_cts != null)
             {
                 _cts.Cancel();
-                if (_loopTask != null)
-                {
-                    try { await _loopTask; } catch { }
-                }
 
                 _context.OutputRouter.EmitStateChange(
                     InstanceId,

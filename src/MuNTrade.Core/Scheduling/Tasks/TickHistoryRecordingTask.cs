@@ -42,7 +42,7 @@ namespace MuNTrade.Core.Scheduling.Tasks
         private TickFileRecorder? _recorder;
         private TickFileRecorder? _alwaysRecorder;
 
-        // ★ R1: 錄檔用 bounded channel，OnTick 改為 O(1) enqueue-only
+        //  錄檔用 bounded channel，OnTick 改為 O(1) enqueue-only
         private readonly Channel<TradeTickEvent> _alwaysRecordChannel =
             Channel.CreateBounded<TradeTickEvent>(new BoundedChannelOptions(262_144)
             {
@@ -82,7 +82,7 @@ namespace MuNTrade.Core.Scheduling.Tasks
             if (_opt.AlwaysRecordSubscribedTicks)
             {
                 _alwaysTickToken = _bus.Subscribe<TradeTickEvent>(OnTick);
-                // ★ R1: 啟動常駐錄檔 worker，OnTick 只 enqueue，I/O 在 worker 執行
+                //  啟動常駐錄檔 worker，OnTick 只 enqueue，I/O 在 worker 執行
                 _alwaysRecordCts = new CancellationTokenSource();
                 _alwaysRecordWorker = Task.Run(() => RunAlwaysRecordWorkerAsync(_alwaysRecordCts.Token));
             }
@@ -174,7 +174,7 @@ namespace MuNTrade.Core.Scheduling.Tasks
 
             if (!_opt.AlwaysRecordSubscribedTicks)
             {
-                // ★ R1: 建立本次批次錄檔的獨立 channel
+                //  建立本次批次錄檔的獨立 channel
                 Interlocked.Exchange(ref _batchRecordEnqueued, 0);
                 Interlocked.Exchange(ref _batchRecordProcessed, 0);
                 Interlocked.Exchange(ref _batchRecordHighWatermarkHits, 0);
@@ -319,7 +319,7 @@ namespace MuNTrade.Core.Scheduling.Tasks
             }
             finally
             {
-                // ★ R2: 修正收尾順序，使用 DrainBatchRecorderAsync 確保 worker 寫完才 Dispose recorder
+                // Drain pending batches before disposing the recorder.
                 await DrainBatchRecorderAsync(token, batchWorker, batchWorkerCts, recorder).ConfigureAwait(false);
 
                 _recorder = null;
@@ -363,7 +363,7 @@ namespace MuNTrade.Core.Scheduling.Tasks
 
         private void OnTick(TradeTickEvent tick)
         {
-            // ★ R1: O(1) enqueue only — 絕對不做 I/O、不鎖、不 flush
+            //  O(1) enqueue only — 絕對不做 I/O、不鎖、不 flush
             if (tick == null || tick.IsSimulated || string.IsNullOrWhiteSpace(tick.Symbol))
                 return;
 

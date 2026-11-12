@@ -18,7 +18,7 @@ namespace MuNTrade.Core.Services
         private readonly IBrokerConnectivity _conn;
         private readonly IMarketDataPipeline _pipeline;
 
-        // 你可以改成從設定檔讀
+        // 可改成從設定檔讀
         private readonly string[] _symbols = new[] { "TX00" };
 
         public TradingSymbolActivator(

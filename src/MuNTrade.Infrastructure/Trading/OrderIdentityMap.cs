@@ -77,7 +77,7 @@ namespace MuNTrade.Infrastructure.Trading
             }
         }
 
-        public bool TryGetByKey(string key, out OrderKey orderKey)
+        public bool TryGetByKey(string key, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out OrderKey orderKey)
             => _byKey.TryGetValue(key, out orderKey);
 
         public bool TryGetLastUpdateUtc(string key, out DateTime lastUpdateUtc)

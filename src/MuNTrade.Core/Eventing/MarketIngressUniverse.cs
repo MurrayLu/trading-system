@@ -12,12 +12,11 @@ namespace MuNTrade.Core.Eventing
         public static readonly IReadOnlyList<Type> All = new[]
         {
             typeof(TradeTickEvent),
-            typeof(QuoteBest5Event), // Note: Using QuoteBest5Event as per original Router usage (was Best5Event in user snippet, correcting to actual type used in project)
+            typeof(QuoteBest5Event),
             typeof(QuoteSnapshotEvent),
 
             typeof(KLineClosedEvent),
-            typeof(KLinePartialUpdatedEvent), // Added per snippet but check if actually used in project. User snippet said "KLinePartialUpdatedEvent". 
-                                              // Original Router whitelist didn't have Partial, but user snippet added it. I'll include it.
+            typeof(KLinePartialUpdatedEvent),
 
             typeof(IndicatorsUpdatedEvent),
 

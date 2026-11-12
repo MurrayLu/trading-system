@@ -9,7 +9,7 @@ namespace MuNTrade.Abstractions.Contracts.Strategy
         IEventBus EventBus { get; }
         IClock Clock { get; }
         ILogger Logger { get; }
-        string AccountKey { get; } // [New] 10C Pinning
+        string AccountKey { get; }
         IStrategyOutputRouter OutputRouter { get; }
     }
 }

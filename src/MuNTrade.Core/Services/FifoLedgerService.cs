@@ -15,7 +15,6 @@ using MuNTrade.Abstractions.Domain.Trading.Enums;
 using MuNTrade.Abstractions.Events.Capital;
 using MuNTrade.Abstractions.Events.System;
 using MuNTrade.Abstractions.Settings.Common;
-using MuNTrade.Abstractions.Events.Capital; // For SimAccountChangedEvent
 using MuNTrade.Abstractions.Domain.Capital; // For SimAccountModel
 using MuNTrade.Core.Capital;
 
@@ -261,13 +260,13 @@ namespace MuNTrade.Core.Services
                     completedTrade.ExitCorrelationId, completedTrade.NetPnL, completedTrade.StockId, completedTrade.Quantity);
                 _bus.Publish(completedTrade);
 
-                if (completedTrade.AccountKey.StartsWith("Sim:", StringComparison.OrdinalIgnoreCase) || 
+                if (completedTrade.AccountKey.StartsWith("Sim:", StringComparison.OrdinalIgnoreCase) ||
                    (!completedTrade.AccountKey.Equals("Real", StringComparison.OrdinalIgnoreCase) && _isSimMode))
                 {
                     UpdateSimAccountBalance(completedTrade);
                 }
-                
-                if (completedTrade.AccountKey.Equals("Real", StringComparison.OrdinalIgnoreCase) || 
+
+                if (completedTrade.AccountKey.Equals("Real", StringComparison.OrdinalIgnoreCase) ||
                     (!_isSimMode && !completedTrade.AccountKey.StartsWith("Sim:", StringComparison.OrdinalIgnoreCase)))
                 {
                     _ = UpdateLiveAccountBalanceAsync(completedTrade);
@@ -281,7 +280,7 @@ namespace MuNTrade.Core.Services
             {
                 var state = await _stateRepo.LoadAsync();
                 var account = state.Accounts?.FirstOrDefault(a => a.Id == state.ActiveAccountId) ?? state.Accounts?.FirstOrDefault();
-                
+
                 if (account == null)
                 {
                     _logger.LogWarning("[FifoLedger] No live account found in CapitalStateRepository to update PnL.");
@@ -305,7 +304,7 @@ namespace MuNTrade.Core.Services
 
                 account.RealizedPnL += trade.NetPnL;
 
-                // [Fix] 實盤也套用與昨日切分的規則，計算「今日」已實現損益
+                // 實盤也套用與昨日切分的規則，計算「今日」已實現損益
                 bool isFutures = _tradeRulesProvider.Current.Futures.ContainsKey(trade.StockId ?? "") ||
                                  trade.StockId?.StartsWith("TX") == true ||
                                  trade.StockId?.StartsWith("MTX") == true;
@@ -379,9 +378,10 @@ namespace MuNTrade.Core.Services
                 }
 
                 // 2. Resolve Market Kind
-                bool isFutures = _tradeRulesProvider.Current.Futures.ContainsKey(trade.StockId) ||
-                                 trade.StockId.StartsWith("TX") ||
-                                 trade.StockId.StartsWith("MTX");
+                var stockId = trade.StockId ?? string.Empty;
+                bool isFutures = _tradeRulesProvider.Current.Futures.ContainsKey(stockId) ||
+                                 stockId.StartsWith("TX") ||
+                                 stockId.StartsWith("MTX");
 
                 // 3. Update Balance
                 if (isFutures)
@@ -397,14 +397,14 @@ namespace MuNTrade.Core.Services
 
                 // 3.5 Update Daily Realized PnL (State-based)
                 // This ensures PnL is tracked persistently and survives restarts.
-                // [Fix] Use Official Trading Session or Virtual Date fallback
+                // Use Official Trading Session or Virtual Date fallback
                 var now = _clock.Now;
                 DateOnly tradeDateOnly;
                 DateTime tradeDate;
 
                 var session = _sessionProvider.GetSession("TX00", now);
                 string sourceLedger;
-                // If we are in a valid session, define trade date by session.
+                // Use the session date when a valid session is available.
                 if (session != null)
                 {
                     tradeDateOnly = session.TradeDate;
@@ -661,7 +661,7 @@ namespace MuNTrade.Core.Services
                 lock (_sync)
                 {
                     _processedFills.Clear();
-                    
+
                     foreach (var accountKey in accountKeys)
                     {
                         var path = GetFillHistoryPath(accountKey);
@@ -946,7 +946,7 @@ namespace MuNTrade.Core.Services
                 var f = ResolveFutureSpec(symbol, rules);
                 if (f != null)
                 {
-                    // 修正：手續費為雙邊 (round-trip)，因此單邊需除以 2
+                    // The configured fee is round-trip, so charge half per side.
                     return (f.FeePerOrder / 2m) * Math.Abs(qty);
                 }
                 return 25m * Math.Abs(qty); // Default

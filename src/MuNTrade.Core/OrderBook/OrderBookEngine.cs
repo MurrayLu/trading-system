@@ -78,8 +78,7 @@ namespace MuNTrade.Core.OrderBook
         {
             var cfg = GetEngineOptions();
 
-            // [Fix] 時間軸契約修正 (選項 A):
-            // 成交使用 ExchangeTs 查詢 Session，確保對齊「交易所正史」。
+            // 成交使用 ExchangeTs 查詢 Session，與交易所時間保持一致。
             // 這避免了因網路傳輸延遲導致 ArrivalTs 漂移到錯誤的 Session (如跨日/收盤後)。
             var session = _sessionProvider.GetSession(tick.Symbol, tick.ExchangeTs.Value);
             if (session == null) return;
@@ -148,7 +147,7 @@ namespace MuNTrade.Core.OrderBook
                 // 將上一個聚合寫入 (Flush)
                 FlushAggregation(ctx, cfg, session.StartTime);
 
-                // 設定新的待處理聚合 
+                // 設定新的待處理聚合
                 ctx.PendingAggregation = new AggregatedState
                 {
                     Symbol = tick.Symbol,
@@ -237,13 +236,9 @@ namespace MuNTrade.Core.OrderBook
 
             var cfg = GetEngineOptions();
 
-            // [Fix] 時間軸契約修正 (選項 A 實作):
-            // 移除 Best5 的 Session 檢查 (原本使用 ArrivalTs 導致與 Trade 的 ExchangeTs 不一致)。
-            // 現在 Best5 完全依賴 OnTrade 開啟的 Session Gate (ctx.CurrentSessionStart)。
+            // Best5 事件依賴 OnTrade 開啟的 Session Gate (ctx.CurrentSessionStart)。
             // 這是為了避免「本機到達時間」與「交易所時間」在跨盤/收盤時的錯切衝突。
             // 如果 Context 未初始化 (尚未收到 Session 內的第一筆 Trade)，我們仍允許更新 Book 但不重置 Session 狀態。
-
-            // var session = _sessionProvider.GetSession(best5.Symbol, best5.ArrivalTs.Value); // REMOVED
 
             var ctx = _contexts.GetOrAdd(best5.Symbol, _ => new SymbolContext());
 
@@ -252,7 +247,7 @@ namespace MuNTrade.Core.OrderBook
 
             lock (ctx.SyncRoot)
             {
-                // --- 檢查是否過時 ---
+                //檢查是否過時 ---
                 bool isStale = ctx.LastBest5ArrivalTs != default && (best5.ArrivalTs - ctx.LastBest5ArrivalTs).TotalSeconds > 5;
 
                 var startTime = (ctx.LastBest5ArrivalTs == default || isStale)
@@ -264,10 +259,10 @@ namespace MuNTrade.Core.OrderBook
 
                 if (isStale) ctx.IcebergSuspects.Clear();
 
-                // --- 計算 OFI (Order Flow Imbalance) ---
+                //計算 OFI (Order Flow Imbalance) ---
                 CalculateAndPublishOFI(ctx, best5);
 
-                // --- Quality Gate Update ---
+                //Quality Gate Update ---
                 var (score, tier, reasons) = ctx.QualityGate.UpdateBest5(best5.ArrivalTs, isStale);
                 ctx.LastQualityTier = tier;
 
@@ -295,7 +290,6 @@ namespace MuNTrade.Core.OrderBook
                     _icebergDetector.OverrideMadWindow(best5.Symbol, effWindow);
 
                     // 3. Liquidity Floors (Handled in Process call via effAdd/effPull)
-                    // _liquidityFlowDetector.OverrideFloors removed.
 
                     // 4. Iceberg Event Throttle (base default)
                     var profThrottle = TimeSpan.FromSeconds(1);
@@ -322,14 +316,14 @@ namespace MuNTrade.Core.OrderBook
                     _icebergTracker.OnBest5Snapshot(best5.Symbol, best5, best5.ArrivalTs, isStale, bboTick);
                 }
 
-                // --- 準備新單 ---
+                //準備新單 ---
                 var newBids = ToDictionary(best5.Bids);
                 var newAsks = ToDictionary(best5.Asks);
 
                 var detectorEvents = new List<object>();
                 int suppressedCount = 0;
 
-                // --- 比較新舊單 ---
+                //比較新舊單 ---
                 if (!isStale)
                 {
                     int wallThreshold = CalculateWallThreshold(ctx, cfg);
@@ -337,7 +331,7 @@ namespace MuNTrade.Core.OrderBook
 
                     var updates = new List<OrderBookChangeEvent>();
 
-                    // [Fix] O(1) 效能優化：預先計算此區間內的成交量分佈
+                    // O(1) 效能優化：預先計算此區間內的成交量分佈
                     // 避免在 CompareSideOptimized 迴圈內重複掃描 Queue (O(N) -> O(1))
                     var matchedVols = BuildMatchedVolumeMap(ctx, startTime, endTime);
 
@@ -398,7 +392,7 @@ namespace MuNTrade.Core.OrderBook
                     {
                         var guards = new LiquidityTimeGuards(250, 250, 300, 200, 300);
 
-                        // [Fix] Sync with Large Trade Threshold (User Request):
+                        // Sync with Large Trade Threshold :
                         // If "Large Order" is dynamically calculated (e.g. 89), use it.
                         // If not yet available (Opening, stats not frozen), fallback to default 50.
                         var baseAdd = cfg.Liquidity.add_floor;
@@ -437,7 +431,7 @@ namespace MuNTrade.Core.OrderBook
                     }
                 }
 
-                // --- Kill Switch Logic ---
+                //Kill Switch Logic ---
                 foreach (var evt in detectorEvents)
                 {
                     bool suppress = false;
@@ -456,7 +450,7 @@ namespace MuNTrade.Core.OrderBook
                         // BigHang/BigPull are allowed but marked as SuppressedByQuality (handled in detector)
                     }
 
-                    // Enforce Quality Gate (Item 9) and skip internal state update when quality is bad/degraded
+                    // Skip internal state updates when quality is bad or degraded.
                     if (!suppress && allowIceberg)
                     {
                         if (evt is IcebergSuspectEvent susp) _icebergTracker.OnIcebergSuspect(susp);
@@ -485,13 +479,13 @@ namespace MuNTrade.Core.OrderBook
                     suppressedCount
                 ));
 
-                // --- 更新新單 ---
+                //更新新單 ---
                 ctx.CurrentBids = newBids;
                 ctx.CurrentAsks = newAsks;
             }
         }
 
-        // [New] 構建成交量查詢表 (O(T) where T is active trade count)
+        // 構建成交量查詢表 (O(T) where T is active trade count)
         private Dictionary<decimal, double> BuildMatchedVolumeMap(SymbolContext ctx, DateTime startTime, DateTime endTime)
         {
             var map = new Dictionary<decimal, double>();
@@ -516,7 +510,7 @@ namespace MuNTrade.Core.OrderBook
                 }
             }
 
-            // [Fix] Include current PendingAggregation as it might not be flushed to RecentTrades yet
+            // Include current PendingAggregation as it might not be flushed to RecentTrades yet
             var pending = ctx.PendingAggregation;
             if (pending != null && pending.ArrivalTs.Value > lookbackStart && pending.ArrivalTs.Value <= lookbackEnd)
             {
@@ -644,7 +638,7 @@ namespace MuNTrade.Core.OrderBook
             Dictionary<decimal, int> oldState, Dictionary<decimal, int> newState,
             bool isBid, int wallThreshold, int dynamicThreshold, OrderBookEngineOptions cfg, int effectiveMinTrade, bool isStale,
             Dictionary<decimal, double> matchedVols, double quality, OrderBookQualityTier tier, List<object> detectorEvents, bool allowIceberg,
-            bool priceMovedSide) // [New] Pass detectorEvents
+            bool priceMovedSide)
         {
             var changes = new List<OrderBookChangeEvent>();
             double addSum = 0, pullSum = 0, replSum = 0;
@@ -700,7 +694,7 @@ namespace MuNTrade.Core.OrderBook
                     // Pull：扣掉成交「被吃掉」部分後仍為淨減少者
                     pull = Math.Max(0, (-rawDelta) - consumedByTrade);
 
-                    // Add：扣除 Replenish 後的淨新增
+                    // Net added volume excludes replenishment.
                     add = Math.Max(0, rawDelta - (int)repl);
                 }
                 else
@@ -721,15 +715,14 @@ namespace MuNTrade.Core.OrderBook
                     if (add > maxAddDelta) { maxAddDelta = add; maxAddPrice = price; }
                     if (pull > maxPullDelta) { maxPullDelta = pull; maxPullPrice = price; }
 
-                    // 這裡維持你原本的 Change 記錄（若 UI/分析要用）
+                    // 這裡維持既有的 Change 記錄（若 UI/分析要用）
                     var action = DetermineAction((int)volAtPrice, rawDelta);
                     changes.Add(new OrderBookChangeEvent(
                         price, rawDelta, action, isBid));
                 }
             }
 
-            // LiquidityFlowDetector call is handled by the caller (OnBest5).
-            // This method returns the comparison statistics and changes.
+            // Return the comparison statistics and changes.
 
             return new SideComparisonResult(changes, addSum, pullSum, replSum, maxAddDelta, maxPullDelta, maxAddPrice, maxPullPrice);
         }
@@ -806,7 +799,7 @@ namespace MuNTrade.Core.OrderBook
             public string? LastLargeThresholdReason { get; set; }
             public int LastLoggedOpeningSampleCount { get; set; } = -1;
 
-            // --- SSOT for background liquidity ---
+            //SSOT for background liquidity ---
             public readonly MuNTrade.Core.Common.FlowRollingPercentile AddPctl = new(256);
             public readonly MuNTrade.Core.Common.FlowRollingPercentile PullPctl = new(256);
             public MuNTrade.Abstractions.Dtos.OrderBook.FlowWindowStats LastFlowStats = MuNTrade.Abstractions.Dtos.OrderBook.FlowWindowStats.Zero;

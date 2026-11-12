@@ -34,7 +34,7 @@ namespace MuNTrade.Core.Trading
         private readonly IEnumerable<IRiskRule> _rules;
         private readonly ConcurrentDictionary<string, DateTime> _lastExitTime = new();
         private readonly IPriceTierService _priceTier;
-        // [10C] New Dependencies
+        // Dependencies used to resolve and inspect account capital.
         private readonly MuNTrade.Abstractions.Contracts.Capital.ICapitalProvider _capitalProvider;
         private readonly MuNTrade.Core.Services.Capital.AccountLedgerResolver _ledgerResolver;
 
@@ -58,53 +58,37 @@ namespace MuNTrade.Core.Trading
             _ledgerResolver = ledgerResolver;
         }
 
-        // [10C] New Risk Evaluation for Intent
+        // Validate the intent identity and market before returning approval.
         public RiskDecision Evaluate(MuNTrade.Abstractions.Dtos.Trading.OrderIntent intent)
         {
             if (string.IsNullOrWhiteSpace(intent.AccountKey))
                 return RiskDecision.Reject("Intent missing AccountKey");
 
-            // [10C] 必須檢查 MarketKind
+            // 必須檢查 MarketKind
             if (intent.MarketKind == MuNTrade.Abstractions.Domain.Common.Enums.MarketKind.Unknown)
                 return RiskDecision.Reject("Intent missing MarketKind (Market Truth not resolved)");
 
             // 1. Resolve LedgerKey (Implicitly validates MarketKind too)
-            // If intent already has MarketKind (from Pinning), we create LedgerKey directly.
-            // Pinning ensures MarketKind is set.
+            // Resolve the ledger from the validated account and market.
             var ledgerKey = new MuNTrade.Abstractions.Domain.Capital.LedgerKey(intent.AccountKey, intent.MarketKind);
 
-            // [10C-PROBE] Verification Log
-            if (intent.IntentKind == "10C_PROBE" || (intent.StrategyId != null && intent.StrategyId.StartsWith("Verification.10C", StringComparison.OrdinalIgnoreCase)))
+            // Verification Log
+            if (intent.IntentKind == "LEDGER_PROBE" || (intent.StrategyId != null && intent.StrategyId.StartsWith("Verification.LedgerProbe", StringComparison.OrdinalIgnoreCase)))
             {
-                _logger.LogWarning("[10C-PROBE][RISK] StrategyId={StrategyId} AccountKey={AccountKey} Symbol={Symbol} IntentMarketKind={MarketKind} LedgerKey={LedgerKey}",
+                _logger.LogWarning("[LEDGER-PROBE][RISK] StrategyId={StrategyId} AccountKey={AccountKey} Symbol={Symbol} IntentMarketKind={MarketKind} LedgerKey={LedgerKey}",
                     intent.StrategyId, intent.AccountKey, intent.Symbol, intent.MarketKind, ledgerKey);
             }
 
-            // 2. Capital Check
-            var capital = _capitalProvider.GetSnapshot(ledgerKey);
+            // This path validates identity and market, reads capital, and currently applies no capital limit.
+            _ = _capitalProvider.GetSnapshot(ledgerKey);
 
-            // TODO: Implement actual Capital Rules (e.g. BuyingPower > Cost)
-            // For now, if BuyingPower <= 0, Reject (Safety Net)
-            if (capital.BuyingPower <= 0)
-            {
-                // Check if it's closing position? Intent doesn't clearly say if it's closing unless we check position.
-                // Assuming worst case: Opening.
-                // But wait, strategy might be closing.
-                // For MVP 10C, we just ensure we can query Capital.
-                // We will Log capital state.
-            }
-
-            // 3. Delegate to existing Rules (adapter needed? Or new rules?)
-            // Existing rules expect OrderRequest + Position.
-            // We can map Intent to OrderRequest for compatibility or use new rules.
-
+            // The IRiskRule set expects OrderRequest + Position and is applied on the OrderRequest path below,
+            // not to intents.
             return RiskDecision.Approve();
         }
 
-        // private void OnOrderRequestReceived(OrderRequest request) { ... } // ★ 此事件處理器也應一併移除
-
         /// <summary>
-        /// ★★★ 核心修改 3：實作新的 AssessOrder 介面方法 ★★★
+        /// Evaluates an order request against configured rules and position limits.
         /// </summary>
         public bool AssessOrder(OrderRequest request, Position? currentPosition, out OrderRequest? finalOrder)
         {
@@ -120,7 +104,6 @@ namespace MuNTrade.Core.Trading
             // 1. 可插拔規則檢查
             foreach (var rule in _rules)
             {
-                // ★ 將傳入的 position 傳遞給每一個規則
                 var decision = rule.Evaluate(request, position);
                 if (!decision.IsApproved)
                 {
@@ -128,7 +111,6 @@ namespace MuNTrade.Core.Trading
                 }
             }
 
-            // ★★★ 核心修改 4：所有對 posMgr 的呼叫，都改用傳入的 position 參數 ★★★
             long posQty = position.Quantity;
 
             // 2. 內建風控檢查
@@ -163,7 +145,6 @@ namespace MuNTrade.Core.Trading
         }
 
 
-        // ★★★ 核心修改：BuildOrderDetails 微調，不再接收 SignalAction ★★★
         private bool BuildOrderDetails(OrderRequest request, bool isExitAction, out OrderRequest finalOrder)
         {
             decimal price = request.OriginalSignal.Price;
@@ -187,8 +168,8 @@ namespace MuNTrade.Core.Trading
             }
             finalOrder = request;
 
-            // ★ 使用 isExitAction 來判斷是否需要記錄出場時間
-            if (isExitAction)
+            //  使用 isExitAction 來判斷是否需要記錄出場時間
+            if (isExitAction && !string.IsNullOrWhiteSpace(request.OriginalSignal.StockId))
             {
                 _lastExitTime[request.OriginalSignal.StockId] = _clock.Now;
             }

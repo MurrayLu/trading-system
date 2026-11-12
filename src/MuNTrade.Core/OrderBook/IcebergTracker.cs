@@ -226,7 +226,7 @@ namespace MuNTrade.Core.OrderBook
         // Key: (Symbol, IsBid, Price)
         private readonly ConcurrentDictionary<(string, bool, decimal), IcebergTrackerState> _states = new();
 
-        // Indexes for fast TopN lookup (Item 7)
+        // Indexes for fast TopN lookup.
         // Key: Symbol -> Price -> State
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<decimal, IcebergTrackerState>> _bidIndex = new();
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<decimal, IcebergTrackerState>> _askIndex = new();
@@ -346,7 +346,7 @@ namespace MuNTrade.Core.OrderBook
         {
             // [Refinement] Register to _recentlyClosed to prevent cross-side residual issues
             // and ensure closed loop. Reason = ClearedOpposite (or effectively cleared).
-            // Using ClearedOpposite ensures Resurrection logic (which requires Disappeared) 
+            // Using ClearedOpposite ensures Resurrection logic (which requires Disappeared)
             // will NOT resurrect this.
             if (_states.TryGetValue((e.Symbol, e.IsBid, e.Price), out var state))
             {
@@ -363,21 +363,7 @@ namespace MuNTrade.Core.OrderBook
         {
             if (isStale) return;
 
-            // Optimization (Item 7): Only process visible TopN + cached states
-            // We iterate new Bids/Asks (visible) and lookup.
-            // Also need to decay invisible ones?
-            // "OnBest5Snapshot 僅對 當前可見的 TopN 價位 查表處理"
-            // But we also need to maintain states for invisible ones (Decay check).
-
-            // Strategy:
-            // 1. Process Visible TopN (refresh view, check logic)
-            // 2. Periodically check others? Or check logic only when visible?
-            // "Decayed check" needs to run. 
-            // Only strictly following "Item 7": "OnBest5Snapshot 只對 當前可見的 TopN 價位 ... 查表處理"
-            // If we strictly follow this, states that fall out of TopN might not get updated/decayed immediately.
-            // But `OnTrade` drives logic too. 
-            // Let's iterate all known states for this symbol? The instruction says "不再全掃".
-            // So we only update logic for visible ones here.
+            // Refresh visible levels here; trade events also advance states outside the visible levels.
 
             // Process Bids
             ProcessSide(symbol, snap.Bids, true, arrival, snap, tickSize);
@@ -439,25 +425,7 @@ namespace MuNTrade.Core.OrderBook
             RemoveState(state.Symbol, state.IsBid, state.Price);
         }
 
-        /*  TODO(VisualDecay-Suspect) — 懷疑的「視覺衰退」路徑
-    目的：
-      - 目前 Suspect 超時是直接刪除（靜默），UI 上看不到「變淡→消失」的過場。
-      - 若要加強盤感，可改為：Suspect 超時 => UiPhase = Decaying，由 CheckDecayed(...) 接手 TTL 後清除。
-      - 注意：此改動不應觸發 Decayed 事件（避免「被破/撤退後又 Decayed」的重複終止訊息）。
-
-    建議行為：
-      - 當 state.UiPhase == Suspect 且 (now - state.LastTouched) >= _opts.suspect_quiet_to_decay_sec：
-          -> state.UiPhase = Decaying; // 僅變更相位，不發布事件
-      - CheckDecayed(...) 只在未曾 Breached/Retreated 的情況下送 Decayed；否則僅清除。
-
-    設定參數（皆已存在或可在 Options 補上）：
-      - suspect_quiet_to_decay_sec : double  // 懷疑多久沒活動就轉入 Decaying（建議 3s，可依設定調整）
-      - decay_ttl_sec               : double  // Decaying 階段持續多久後清除（建議 6s）
-
-    驗收：
-      - 同一座冰山在「被破/撤退」後，不會再送 Decayed。
-      - Suspect 超時後 DOM 徽章先轉半透明（Decaying），TTL 到再消失。
-*/
+        // Suspected states are removed after inactivity; no decay phase is emitted.
 
 
         private void PruneStaleStates(string symbol, ArrivalTs now)
@@ -481,14 +449,11 @@ namespace MuNTrade.Core.OrderBook
                             // Suspect: Tighter TTL (e.g. 10s or 2x touch window)
                             if (secSinceTouch > 10.0)
                             {
-                                // [Refinement] Suspect -> Decaying for visual fade; do not publish Decayed for non-confirmed.
+                                // Move suspected states to Decaying without publishing Decayed.
                                 state.UiPhase = IcebergUiPhase.Decaying;
                                 // Mark with a reason that suppresses "Decayed" event in CheckDecayed/Prune
                                 state.ClosedReason = IcebergClosedReason.Decayed;
-                                // Do NOT remove yet; let CheckDecayed/NextPrune handle removal after decay_ttl_sec or immediate?
-                                // User said "visual fade", so we let it stay as Decaying for decay_ttl_sec.
-                                // We break here to avoid immediate removal in this pass (since it falls into Decaying case now? No, switch is on current state).
-                                // Next pass it will be Decaying.
+                                // Retain the state until the decay TTL expires.
                             }
                             break;
 
@@ -735,31 +700,13 @@ namespace MuNTrade.Core.OrderBook
                 if (t.Price <= state.Price) return;
             }
 
-            // Update trade history for this state too?
-            // "TradesNearP" implies trades AT P.
-            // If trade is far past P, does it count as "Near P"?
-            // Maybe not for Volume stats, but definitely for Breach detection.
-
-            // We just trigger CheckBreached.
-            // But CheckBreached relies on GetExplainedVolume inside TradesNearP.
-            // If we don't add this trade to TradesNearP, GetExplainedVolume might be 0.
-            // However, if the price gapped, maybe volume at P is indeed 0.
-            // But if it's a sweep, the trade event SHOULD have hit P first?
-            // If the feed gives distinct ticks for each price level, we caught it in "Direct Hits".
-            // If the feed gives one summary tick at the worst price, we see a gap.
-            // In gap case, we should assume the volume cleared P.
-
-            // For now, let's just trigger CheckBreached with the logic that "Current Price < Iceberg Price" is enough.
-            // But we need to pass a non-zero volume if we want to satisfy "min_aggr_vol".
-            // Since we don't know the exact volume at P in a gap, we might force it?
-            // Or just rely on the fact that if price is significantly past, it's breached.
+            // Trade-through events can indicate a breach even when no trade was reported at the tracked price.
 
             state.LastTouched = t.ArrivalTs; // It was interacted with (destroyed)
 
             if ((t.ArrivalTs - state.LastBreached).TotalSeconds < _opts.breach_debounce_sec) return;
 
-            // Simplified Breach for Trade-Through:
-            // If we are here, price is strictly past the iceberg.
+            // The trade price has moved beyond the tracked level.
             if (ShouldThrottle(nameof(IcebergBreachedEvent), state, t.ArrivalTs)) return;
             _bus.Publish(new IcebergBreachedEvent(state.Symbol, state.Price, state.IsBid, t.ArrivalTs, t.Volume)
             {
@@ -812,7 +759,7 @@ namespace MuNTrade.Core.OrderBook
             var aggrVol = state.TradesNearP.GetAggressorVolume(!state.IsBid, state.Price, state.Price);
             if (aggrVol < _opts.min_touch_aggr_vol) return;
 
-            // Absorb Check (Item 1): Replenish > 0 OR QtyAfter > QtyBefore - Explained
+            // Absorption is indicated by replenishment or a smaller-than-expected quantity drop.
             var (qtyBefore, qtyAfter, replenish, deplete) = state.BookAtP.GetChanges();
             int tradesExplained = state.TradesNearP.GetExplainedVolume(state.IsBid);
 
@@ -862,8 +809,7 @@ namespace MuNTrade.Core.OrderBook
             if (state.UiPhase != IcebergUiPhase.Confirmed) return;
 
 
-            // [Refinement B] Retreated Verification
-            // Item 2: Unexplained Drop = Deplete - ExplainedByAggressor
+            // Verify retreat using the drop not explained by aggressor trades.
             var (qtyBefore, qtyAfter, replenish, deplete) = state.BookAtP.GetChanges();
 
             // Note: deplete is positive (sum of negative deltas inverted).
@@ -942,7 +888,6 @@ namespace MuNTrade.Core.OrderBook
 
         private bool CheckPersistCondition(IcebergTrackerState state, ArrivalTs now)
         {
-            // Item 4: IsVisibleTopN OR (Touched recently)
             if (state.IsVisibleTopN) return true;
             if ((now - state.LastTouched).TotalSeconds < 10.0) return true; // Arbitrary 10s or window
             return false;
@@ -953,7 +898,6 @@ namespace MuNTrade.Core.OrderBook
             if (!_opts.migrated_enabled) return;
             if (state.UiPhase != IcebergUiPhase.Confirmed) return;
 
-            // Item 5: P dropped, P+/-1 rose
             if ((now - state.LastMigrated).TotalSeconds < _opts.migrate_window_sec) return;
 
             // Simplified detection:
@@ -1008,7 +952,6 @@ namespace MuNTrade.Core.OrderBook
 
         private void CheckDecayed(IcebergTrackerState state, ArrivalTs now)
         {
-            // Item 6: Only if Decaying phase
             if (state.UiPhase == IcebergUiPhase.Decaying)
             {
                 // [Refinement A] Delayed Cleanup for Breached
@@ -1050,7 +993,6 @@ namespace MuNTrade.Core.OrderBook
             return false;
         }
 
-        // Item 13: Batch API implementation
         public int TryGetUiBadges(string symbol, IReadOnlyList<decimal> prices, bool isBid, (IcebergUiPhase phase, IcebergTier tier)[] results)
         {
             var index = isBid ? _bidIndex : _askIndex;

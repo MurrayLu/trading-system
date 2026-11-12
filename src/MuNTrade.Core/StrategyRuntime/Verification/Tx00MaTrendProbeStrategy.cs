@@ -148,7 +148,7 @@ namespace MuNTrade.Core.StrategyRuntime.Verification
         {
             if (_lastClose1m == null || _sma5 == null || _sma10 == null)
             {
-                // Emit Warning if we have Close but missing SMA (likely appsettings issue or warmup)
+                // Report missing SMA data when a close value is available.
                 if (_lastClose1m.HasValue && (_sma5 == null || _sma10 == null))
                 {
                     var msg = $"Warning: Missing SMA data. Close={_lastClose1m}. LastInd: Period={_debugLastIndPeriod}, Keys={_debugLastIndKeys}";

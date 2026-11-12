@@ -22,7 +22,6 @@ using MuNTrade.Abstractions.Dtos.Trading;
 using MuNTrade.Abstractions.Dtos.Broker;
 using MuNTrade.Abstractions.Dtos.Capital;            // For PriceLevel
 using MuNTrade.Core.Trading.Adapters;        // For MarketSnapshotBuilder
-using MuNTrade.Core.Trading.Slice1;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -97,7 +96,7 @@ namespace MuNTrade.Core.Trading.Gateways
         public Task<string> PlaceFutureOrderAsync(OrderRequest request) => ProcessOrder(request);
         public Task<string> PlaceOptionOrderAsync(OrderRequest request) => ProcessOrder(request);
 
-        // [New] 實作 IOrderGateway 缺少的成員
+        // 實作 IOrderGateway 缺少的成員
         public Task<decimal> GetBuyingPowerAsync(string symbol)
         {
             // 模擬擁有無限購買力或固定額度
@@ -106,7 +105,7 @@ namespace MuNTrade.Core.Trading.Gateways
 
         private Task<string> ProcessOrder(OrderRequest request)
         {
-            // [Fix] OrderRequest 沒有直接的 StockId/Price，需從 OriginalSignal 取得
+            // OrderRequest 沒有直接的 StockId/Price，需從 OriginalSignal 取得
             var stockId = request.OriginalSignal?.StockId ?? "UNKNOWN";
             var price = request.OriginalSignal?.Price ?? 0m;
             // 如果請求是針對 Limit 且 OriginalSignal.Price 為 0，可能需要檢查策略邏輯，這裡暫時信任 Signal
@@ -157,7 +156,7 @@ namespace MuNTrade.Core.Trading.Gateways
 
         public Task CancelOrderAsync(string orderId) => CancelOrderBySeqNoAsync(orderId);
 
-        // --- New Interface Implementation ---
+        // IOrderGateway implementation.
 
         public Task<string> CancelOrderBySeqNoAsync(string seqNo)
         {
@@ -303,7 +302,7 @@ namespace MuNTrade.Core.Trading.Gateways
         private void MatchMarketOrder(PaperOrderContext order)
         {
             var symbol = order.Request.OriginalSignal?.StockId ?? "";
-            // [Fix] Ensure strictly using Order Book logic
+            // Ensure strictly using Order Book logic
             var fillPrice = ResolveMarketFillPrice(order.Request.Side, symbol);
 
             if (fillPrice > 0)
@@ -378,7 +377,7 @@ namespace MuNTrade.Core.Trading.Gateways
 
                     if (order.Request.OrderType == OrderType.Market)
                     {
-                        // [Fix] Market uses Best Quote, NOT Tick Price directly
+                        // Market uses Best Quote, NOT Tick Price directly
                         var fill = ResolveMarketFillPrice(order.Request.Side, tick.Symbol);
                         if (fill <= 0) continue; // No quote available, keep queuing
 
@@ -422,7 +421,7 @@ namespace MuNTrade.Core.Trading.Gateways
 
         private void OnBest5Received(QuoteBest5Event e)
         {
-            // [Fix] QuoteBest5Event 使用 List<PriceLevel> Bids/Asks
+            // QuoteBest5Event 使用 List<PriceLevel> Bids/Asks
             decimal bid1 = (e.Bids != null && e.Bids.Count > 0) ? e.Bids[0].Price : 0;
             decimal ask1 = (e.Asks != null && e.Asks.Count > 0) ? e.Asks[0].Price : 0;
             UpdateQuoteCache(e.Symbol, bid1, ask1);
@@ -443,7 +442,7 @@ namespace MuNTrade.Core.Trading.Gateways
                 });
         }
 
-        // [New] Attempt to fill queued market orders when quotes update
+        // Attempt to fill queued market orders when quotes update
         private void TryFillQueuedMarketOrders(string symbol)
         {
             if (!_orderBook.TryGetValue(symbol, out var orders)) return;
@@ -487,7 +486,7 @@ namespace MuNTrade.Core.Trading.Gateways
 
         private decimal ResolveMarketFillPrice(OrderSide side, string symbol)
         {
-            // [Fix] Strictly use Best Bid/Ask from Order Book (Snapshot/Best5)
+            // Strictly use Best Bid/Ask from Order Book (Snapshot/Best5)
             // Do NOT use Tick's AskAtTrade/BidAtTrade as they often reflect "Last Price" or "Matched Price"
             if (TryGetBestQuote(symbol, out var bid, out var ask))
                 return side == OrderSide.Buy ? ask : bid;

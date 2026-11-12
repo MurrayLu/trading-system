@@ -39,18 +39,16 @@ namespace MuNTrade.Core.Services
 
             public OpenPositionState(OrderFillEvent firstFill, long? remainingQty = null)
             {
-                // ★★★ 核心修改 1：不再從 Action 推斷，直接使用 Side ★★★
-                // 新版 OrderFillEvent 直接提供了方向 (Side)，不再需要 SignalAction。
+                // OrderFillEvent provides the trade direction, so SignalAction is not needed here.
                 this.Direction = firstFill.Side;
 
                 this.TotalQuantity = remainingQty ?? firstFill.FillQuantity;
                 this.AveragePrice = firstFill.FillPrice;
                 this.FirstEntryTime = firstFill.FillTime;
 
-                // ★★★ 核心修改 2：使用新的 OriginalReason 欄位 ★★★
                 this.FirstEntryReason = firstFill.OriginalReason ?? string.Empty;
 
-                // Patch 16: Track Attribution
+                // Track trade attribution.
                 this.StrategyId = firstFill.StrategyId ?? "";
                 this.AccountKey = firstFill.AccountKey ?? "";
                 this.EntryCorrelationId = firstFill.CorrelationId ?? "";
@@ -58,7 +56,6 @@ namespace MuNTrade.Core.Services
 
             public void AddFill(OrderFillEvent fill)
             {
-                // ★★★ 核心修改 3：判斷加碼的邏輯大大簡化 ★★★
                 // 如果成交方向 (fill.Side) 與目前倉位方向 (this.Direction) 相同，就是加碼。
                 bool isCorrectScaleIn = (this.Direction == fill.Side);
 
@@ -119,13 +116,12 @@ namespace MuNTrade.Core.Services
                     EntryTime = this.FirstEntryTime,
                     ExitTime = fill.FillTime,
                     EntryReason = this.FirstEntryReason,
-                    // ★★★ 核心修改 4：使用新的 OriginalReason 欄位 ★★★
                     ExitReason = fill.OriginalReason ?? string.Empty,
                     Commission = totalCommission,
                     Tax = transactionTax,
                     GrossPnL = grossPnL,
                     NetPnL = netPnL,
-                    // Patch 16: Attribution
+                    // Preserve trade attribution.
                     StrategyId = this.StrategyId,
                     AccountKey = this.AccountKey,
                     EntryCorrelationId = this.EntryCorrelationId,
@@ -155,7 +151,6 @@ namespace MuNTrade.Core.Services
             {
                 if (string.IsNullOrEmpty(fill.StockId)) return;
 
-                // ★★★ 核心修改 5：倉位變化量計算邏輯大大簡化 ★★★
                 // 不再需要 switch(fill.Action)，直接根據 Side 判斷。
                 // Buy 為正，Sell 為負。
                 long signedDelta = (fill.Side == OrderSide.Buy) ? fill.FillQuantity : -fill.FillQuantity;
@@ -176,7 +171,6 @@ namespace MuNTrade.Core.Services
                         Trades.Add(trade);
                         _equityCurve.Add(_equityCurve.Last() + trade.NetPnL);
                         _openTrades.TryRemove(fill.StockId, out _);
-                        //_bus.Publish(trade); // [FIX] Disabled: Already published by PositionManagerService
                         _logger.LogWarning("[TradeLogger] 平倉 {StockId}, 淨損益={Pnl:F2}", trade.StockId, trade.NetPnL);
                     }
                     else // 反手
@@ -184,7 +178,6 @@ namespace MuNTrade.Core.Services
                         var trade = pos.CloseWith(fill, partial: true);
                         Trades.Add(trade);
                         _equityCurve.Add(_equityCurve.Last() + trade.NetPnL);
-                        //_bus.Publish(trade); // [FIX] Disabled: Already published by PositionManagerService
 
                         var newPos = new OpenPositionState(fill, remainingQty: Math.Abs(signedNew));
                         _openTrades[fill.StockId] = newPos;
@@ -193,7 +186,6 @@ namespace MuNTrade.Core.Services
                 }
                 else // 開新倉
                 {
-                    // ★★★ 核心修改 6：開新倉邏輯簡化 ★★★
                     // 如果沒有現有倉位，任何成交都視為開新倉，不再需要檢查 Action。
                     var newPos = new OpenPositionState(fill);
                     _openTrades.TryAdd(fill.StockId, newPos);

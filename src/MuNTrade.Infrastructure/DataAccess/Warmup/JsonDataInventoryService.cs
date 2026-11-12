@@ -1,5 +1,4 @@
-﻿// MuNTrade.Infrastructure/DataAccess/Warmup/JsonDataInventoryService.cs
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MuNTrade.Abstractions.Contracts.Time;
 using MuNTrade.Abstractions.Contracts.Warmup;
@@ -18,14 +17,13 @@ namespace MuNTrade.Infrastructure.DataAccess.Warmup
 {
     /// <summary>
     /// 重新掃描歷史 JSON 檔以建立/維護 Coverage（From/To/IsClosed）。
-    /// ★ 修正重點：IsClosed 與 LCD 的判定改用 ITradingSessionProvider + IHolidayCalendar，
-    ///   與 HistoryWarmupService 完全一致，避免下午盤中仍把今日視為未完成的情況。
+    /// Determines IsClosed and LCD with the trading session provider and holiday calendar.
     /// </summary>
     public sealed class JsonDataInventoryService : IDataInventoryService
     {
         private readonly ILogger<JsonDataInventoryService> _log;
-        private readonly ITradingSessionProvider _sessions; // ★ 新增：交易時段
-        private readonly IHolidayCalendar _calendar;        // ★ 新增：交易日曆
+        private readonly ITradingSessionProvider _sessions;
+        private readonly IHolidayCalendar _calendar;
         private readonly IClock _clock;
         private readonly HistoricalDataReader _reader;
         private readonly string _inventoryRoot;
@@ -39,8 +37,8 @@ namespace MuNTrade.Infrastructure.DataAccess.Warmup
             ILogger<JsonDataInventoryService> log,
             HistoricalDataReader reader,
             IOptions<DataSourceSettings> options,
-            ITradingSessionProvider sessions,  // ★ 新增注入
-            IHolidayCalendar calendar,         // ★ 新增注入
+            ITradingSessionProvider sessions,
+            IHolidayCalendar calendar,
             IClock clock)
         {
             _log = log;
@@ -419,8 +417,8 @@ namespace MuNTrade.Infrastructure.DataAccess.Warmup
 
         /// <summary>
         /// 期末計算：
-        /// - Week：回傳該日期所屬週的週五（遇六/日就回前一個週五）
-        /// - Month：回傳該月最後一天
+        ///Week：回傳該日期所屬週的週五（遇六/日就回前一個週五）
+        ///Month：回傳該月最後一天
         /// </summary>
         private static DateOnly GetPeriodEnd(DateOnly anyDateInPeriod, string timeframe)
         {

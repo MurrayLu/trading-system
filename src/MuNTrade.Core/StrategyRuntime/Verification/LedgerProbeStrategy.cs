@@ -8,8 +8,8 @@ using MuNTrade.Abstractions.Contracts.Market;
 using MuNTrade.Abstractions.Contracts.Strategy;
 using MuNTrade.Abstractions.Dtos.Trading;
 using MuNTrade.Abstractions.Events.System; // StrategyPulseEvent
-using MuNTrade.Abstractions.Domain.Trading.Enums; // [Fix] OrderSide namespace
-using MuNTrade.Abstractions.Domain.Common.Enums; // [Fix] MarketKind/MarketNo namespace
+using MuNTrade.Abstractions.Domain.Trading.Enums; // OrderSide namespace
+using MuNTrade.Abstractions.Domain.Common.Enums; // MarketKind/MarketNo namespace
 
 namespace MuNTrade.Core.StrategyRuntime.Verification
 {
@@ -17,7 +17,7 @@ namespace MuNTrade.Core.StrategyRuntime.Verification
     {
         public StrategyInstanceId InstanceId { get; }
         public StrategyTemplateId TemplateId { get; }
-        public string Version => "1.0.0-10C-ledger-probe";
+        public string Version => "1.0.0-ledger-probe";
 
         private readonly IStrategyRuntimeContext _context;
         private readonly ILogger _log;
@@ -49,10 +49,10 @@ namespace MuNTrade.Core.StrategyRuntime.Verification
             _context.OutputRouter.EmitPacket(
                 TemplateId, InstanceId,
                 scope: MuNTrade.Abstractions.Events.Strategy.StrategyScope.System,
-                scopeKey: "10C",
-                category: MuNTrade.Abstractions.Events.Strategy.StrategyCategory.System, // [Fix] Use System
+                scopeKey: "LedgerProbe",
+                category: MuNTrade.Abstractions.Events.Strategy.StrategyCategory.System,
                 severity: MuNTrade.Abstractions.Events.Strategy.StrategySeverity.Info,
-                actionCode: "10C_PROBE_START",
+                actionCode: "LEDGER_PROBE_START",
                 payload: $"LedgerProbe started. AccountKey pinned by host. Waiting market info for {SymFut}/{SymSec}."
             );
             return Task.CompletedTask;
@@ -69,7 +69,7 @@ namespace MuNTrade.Core.StrategyRuntime.Verification
 
             if (Interlocked.Exchange(ref _emitted, 1) != 0) return;
 
-            _log.LogInformation("[10C-PROBE] MarketInfo ready. {Fut}={FutKind}/{FutNo}, {Sec}={SecKind}/{SecNo}",
+            _log.LogInformation("[LEDGER-PROBE] MarketInfo ready. {Fut}={FutKind}/{FutNo}, {Sec}={SecKind}/{SecNo}",
                 SymFut, futInfo.Kind, futInfo.MarketNo,
                 SymSec, secInfo.Kind, secInfo.MarketNo);
 
@@ -79,19 +79,19 @@ namespace MuNTrade.Core.StrategyRuntime.Verification
             _context.OutputRouter.EmitPacket(
                 TemplateId, InstanceId,
                 scope: MuNTrade.Abstractions.Events.Strategy.StrategyScope.System,
-                scopeKey: "10C",
-                category: MuNTrade.Abstractions.Events.Strategy.StrategyCategory.System, // [Fix] Use System
+                scopeKey: "LedgerProbe",
+                category: MuNTrade.Abstractions.Events.Strategy.StrategyCategory.System,
                 severity: MuNTrade.Abstractions.Events.Strategy.StrategySeverity.Info,
-                actionCode: "10C_PROBE_INTENTS_EMITTED",
+                actionCode: "LEDGER_PROBE_INTENTS_EMITTED",
                 payload: $"Emitted intents for {SymFut} and {SymSec}. Check Risk log."
             );
 
-            await Task.CompletedTask; // [Fix] Async await
+            await Task.CompletedTask;
         }
 
         private void EmitProbeIntent(string symbol, long qty)
         {
-            // [Fix] OrderIntent is a positional record
+            // OrderIntent is a positional record
             var intent = new OrderIntent(
                 Symbol: symbol,
                 Side: qty > 0 ? OrderSide.Buy : OrderSide.Sell,
@@ -102,13 +102,13 @@ namespace MuNTrade.Core.StrategyRuntime.Verification
                 AccountKey: "",
                 MarketKind: MarketKind.Unknown,
                 MarketNo: MarketNo.Unknown,
-                IntentKind: "10C_PROBE"
+                IntentKind: "LEDGER_PROBE"
             );
 
             _context.OutputRouter.EmitIntent(
                 InstanceId,
                 TemplateId,
-                intentKind: "10C_PROBE",
+                intentKind: "LEDGER_PROBE",
                 intent
             );
         }

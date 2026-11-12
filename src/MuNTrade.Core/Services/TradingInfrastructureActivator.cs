@@ -11,7 +11,7 @@ namespace MuNTrade.Core.Services
     /// </summary>
     public class TradingInfrastructureActivator : IHostedService
     {
-        // 在建構式中注入你希望被「喚醒」的服務。
+        // 在建構式中注入所需被「喚醒」的服務。
         // DI 容器會確保它們被創建。
         public TradingInfrastructureActivator(
             PositionBridge positionBridge,

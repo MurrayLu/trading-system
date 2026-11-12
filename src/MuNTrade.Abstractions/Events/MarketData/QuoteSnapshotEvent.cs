@@ -11,7 +11,7 @@ namespace MuNTrade.Abstractions.Events.MarketData
         public string Symbol { get; set; } = string.Empty;
         public DateTime Timestamp { get; set; }
 
-        // --- ★ 新增的靜態資料欄位 ---
+        // Static market data.
         public string Name { get; set; } = string.Empty;       // 商品名稱
         public decimal ReferencePrice { get; set; }              // 昨收/參考價
         public long YesterdayVolume { get; set; }               // 昨量
@@ -35,7 +35,7 @@ namespace MuNTrade.Abstractions.Events.MarketData
         // 當沖
         public DayTradeStatus? DayTradeStatus { get; set; }
 
-        // ★ 新增 IsSimulated 屬性
+        // Indicates simulated data.
         public bool IsSimulated { get; set; }
 
         public int StockIndex { get; set; }           // 商品自定索引代號

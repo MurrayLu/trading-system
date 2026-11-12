@@ -41,8 +41,8 @@ namespace MuNTrade.Core.Services.Risk
         private readonly IClock _clock;
 
         private int _tradesUsedToday;
-        private int _consecutiveLosses;
-        private decimal _maxDrawdownPctToday;
+        private int _consecutiveLosses = 0;
+        private decimal _maxDrawdownPctToday = 0;
 
         private RiskState _state = new() { IsLocked = false, Reason = RiskLockReason.None };
         public RiskState Current => _state;
@@ -55,8 +55,7 @@ namespace MuNTrade.Core.Services.Risk
             _clock = clock;
 
             _bus.Subscribe<BrokerReportDto>(OnReport);
-            // 若有 EquitySnapshot 型別，可在 EquityCurveService 發佈，在這裡訂閱以刷新 _maxDrawdownPctToday
-            // _bus.Subscribe<EquitySnapshot>(OnEquity);
+            // Maximum drawdown is not currently updated from equity events.
         }
 
         private void OnReport(BrokerReportDto r)
@@ -65,24 +64,19 @@ namespace MuNTrade.Core.Services.Risk
             {
                 _tradesUsedToday++;
             }
-
-            // 連續虧損：實務上應該由成交盈虧事件來判定，這裡先留骨架
-            // if (fillPnL < 0) _consecutiveLosses++; else _consecutiveLosses = 0;
-
-            // 延遲/滑價守門：連續超標可鎖單（骨架）
+            // Consecutive-loss counts are not updated here; they require realized P&L events.
+            // Latency and slippage thresholds are checked without a consecutive-breach counter.
             if (r.LatencyMs.HasValue && r.LatencyMs.Value > _rules.MinLatencyGuardMs)
             {
-                // TODO: 計數窗口，連續 N 次後觸發
+                // Latency breaches are not accumulated over a rolling window.
             }
-            if (r.Slippage.HasValue /* && 超過 Ticks 換算閾值 */)
+            if (r.Slippage.HasValue /* threshold conversion is not applied */)
             {
-                // TODO: 同上
+                // Slippage breaches are not accumulated over a rolling window.
             }
 
             EvaluateLocks();
         }
-
-        // private void OnEquity(EquitySnapshot s) { _maxDrawdownPctToday = s.MaxDrawdownPct; EvaluateLocks(); }
 
         private void EvaluateLocks()
         {
@@ -97,7 +91,7 @@ namespace MuNTrade.Core.Services.Risk
         public bool AllowNewOrder(string symbol, decimal estRisk)
         {
             if (_state.IsLocked) return false;
-            // TODO: PerSymbolExposureLimit / MaxLossPerTrade 等檢查
+            // Per-symbol exposure and per-trade loss limits are not checked here.
             return true;
         }
 

@@ -66,7 +66,7 @@ namespace MuNTrade.Core.Trading.Adapters
                 bool isTrade = dto.Action == "成交" || dto.Status.Contains("成交");
                 if (!isTrade) return;
 
-                // [Fix] 必須有成交量 (Delta > 0)，否則可能是純狀態變更
+                // 必須有成交量 (Delta > 0)，否則可能是純狀態變更
                 if (dto.Quantity <= 0) return;
 
                 // 3. 去重檢查
@@ -105,7 +105,7 @@ namespace MuNTrade.Core.Trading.Adapters
                     OriginalReason = dto.Message
                 };
 
-                // Patch 13: 補齊歸因
+                // Fill in missing attribution fields.
                 if (!string.IsNullOrEmpty(dto.CorrelationId) && _traceRegistry.TryGet(dto.CorrelationId, out var trace))
                 {
                     fillEvent.StrategyId = trace.StrategyId;

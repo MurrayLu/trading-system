@@ -90,8 +90,8 @@ namespace MuNTrade.Infrastructure.Extensions
             services.AddSingleton<IParameterBlacklistRegistry, JsonParameterBlacklistRegistry>();
             services.AddSingleton<IParameterSeedRepository, JsonParameterSeedRepository>();
 
-            // --- Selector 部分 (保持不變) ---
-            // --- Selector 部分 (保持不變) ---
+            //Selector 部分 (保持不變) ---
+            //Selector 部分 (保持不變) ---
             services.AddSingleton<ISymbolSelector>(serviceProvider =>
             {
                 // Parse AppMode
@@ -108,16 +108,16 @@ namespace MuNTrade.Infrastructure.Extensions
                     AppMode.GovernedDaytradeBatch => new TurnoverSelectorAdapter(
                         serviceProvider.GetRequiredService<ITurnoverSymbolSelector>(),
                         serviceProvider.GetRequiredService<IClock>()),
-                    // Optimize might need custom selector too, but defaulting to StaticList for now or logic similar to Backtest
+                    // Optimization uses the configured turnover selector.
                     AppMode.Optimize => new TurnoverSelectorAdapter(
                         serviceProvider.GetRequiredService<ITurnoverSymbolSelector>(),
-                        serviceProvider.GetRequiredService<IClock>()), // Assuming Optimizer uses same selector logic
+                        serviceProvider.GetRequiredService<IClock>()),
                     _ => new StaticListSelector(
                         serviceProvider.GetRequiredService<IOptions<BacktestSettings>>())
                 };
             });
 
-            // ★★★ 核心修正：統一處理所有模式下的 IOrderGateway 註冊 ★★★
+            // Register the order gateway for the selected application mode.
             var modeStr = configuration.GetValue<string>("ApplicationSettings:AppMode");
             if (!Enum.TryParse<AppMode>(modeStr, true, out var currentAppMode))
                 currentAppMode = AppMode.Execution;
@@ -143,7 +143,7 @@ namespace MuNTrade.Infrastructure.Extensions
                     services.AddSingleton<IOrderIdentityMap, OrderIdentityMap>();
                     services.AddSingleton<IOrderManagementService, OrderManagementService>();
 
-                    // [Patch Enable] Coordinator
+                    // Coordinator
                     services.AddSingleton<MuNTrade.Core.Services.BrokerPositionSyncService>();
 
                     Console.WriteLine("▶ Execution: IOrderGateway = RoutingOrderGateway (Sim/Live by AccountKey)");

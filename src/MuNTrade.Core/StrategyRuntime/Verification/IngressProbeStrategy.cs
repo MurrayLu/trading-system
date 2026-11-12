@@ -12,7 +12,7 @@ using MuNTrade.Abstractions.Events.System;
 namespace MuNTrade.Core.StrategyRuntime.Verification
 {
     /// <summary>
-    /// 用於驗證 10B 輸入 (Ingress)/輸出 (Egress) 閘道的輕量級策略。
+    /// 用於驗證 輸入 (Ingress)/輸出 (Egress) 閘道的輕量級策略。
     /// 1. 回音 (Echo)：記錄收到的市場數據以證明輸入功能正常。
     /// 2. 探針 (Probe)：如果收到任何策略輸出事件，則拋出異常/錯誤（線路連接違規驗證）。
     /// </summary>
@@ -25,7 +25,7 @@ namespace MuNTrade.Core.StrategyRuntime.Verification
         private long _totalIngressCount;
 
         // 訂閱有效的市場 + 系統全域 (Universe) 輸入
-        // 此外，如果你想測試路由器的閘道，可以故意訂閱輸出類型（如果路由器使用明確的白名單過濾器，即使我們請求它，路由器也 *不應該* 傳送它）
+        // 此外，如果若需測試路由器的閘道，可以故意訂閱輸出類型（如果路由器使用明確的白名單過濾器，即使我們請求它，路由器也 *不應該* 傳送它）
         // 但對於「探針」行為，我們只訂閱所有允許的項目，並檢查我們收到了什麼。
         // 實際上，為了測試路由器的過濾功能，我們依賴路由器不傳送我們未訂閱的內容，
         // 或者路由器過濾掉我們 *確實* 訂閱了但屬於輸出的內容。
@@ -57,7 +57,7 @@ namespace MuNTrade.Core.StrategyRuntime.Verification
 
         public Task StartAsync(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("IngressProbeStrategy 已啟動。準備探測 10B 閘道。");
+            _logger.LogInformation("IngressProbeStrategy 已啟動。準備探測 ingress gate。");
             return Task.CompletedTask;
         }
 
@@ -69,18 +69,17 @@ namespace MuNTrade.Core.StrategyRuntime.Verification
 
         public ValueTask OnEventAsync(IMuEvent evt, CancellationToken cancellationToken = default)
         {
-            // 1. 探針檢查：這是一個輸出 (Egress) 事件嗎？
-            // 如果路由器正常運作，我們應該永遠不會在這裡看到這些事件。
+            // Output events must not pass through the ingress gate.
             if (evt is StrategyPacketEmittedEvent ||
                 evt is StrategyIntentEmittedEvent ||
                 evt is StrategyStateChangedEvent)
             {
-                _logger.LogCritical("嚴重錯誤：10B 閘道遭突破！收到輸出事件：{EventType}", evt.GetType().Name);
+                _logger.LogCritical("嚴重錯誤：ingress gate 收到輸出事件：{EventType}", evt.GetType().Name);
                 // 可選擇拋出異常以讓執行時崩潰並警示操作員
-                throw new InvalidOperationException($"10B 檢查失敗：收到輸出事件 {evt.GetType().Name}");
+                throw new InvalidOperationException($"Ingress gate check failed: received output event {evt.GetType().Name}");
             }
 
-            // [驗證更新] 僅過濾 TX00 以驗證特定合約的源資料
+            // 僅過濾 TX00 以驗證特定合約的源資料
             if (evt is TradeTickEvent tick && tick.Symbol != "TX00")
             {
                 return ValueTask.CompletedTask;

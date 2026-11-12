@@ -60,7 +60,7 @@ namespace MuNTrade.Core.Settings
     {
         public double learning_duration_minutes { get; set; } = 15.0;
 
-        // --- Large Trade ---
+        //Large Trade ---
         public double large_trade_z_score { get; set; } = 3.0;
         public double large_trade_dynamic_mul { get; set; } = 5.0;
         public double large_trade_min_floor { get; set; } = 10.0;
@@ -68,20 +68,20 @@ namespace MuNTrade.Core.Settings
         public double stat_fallback_threshold { get; set; } = 50.0;
         public double stat_fallback_mean { get; set; } = 5.0;
 
-        // --- Wall / Dynamic ---
+        //Wall / Dynamic ---
         public int institutional_size { get; set; } = 500;
         public double wall_size_mul { get; set; } = 10.0;
         public int min_wall_size { get; set; } = 50;
 
-        // --- Change ---
+        //Change ---
         public double change_relative_mul { get; set; } = 5.0;
         public int change_min_size { get; set; } = 50;
         public int alert_change_size { get; set; } = 50;
 
-        // --- Logic ---
+        //Logic ---
         public int iceberg_min_trade { get; set; } = 5;
 
-        // --- Sub-Detectors ---
+        //Sub-Detectors ---
         public IcebergDetectorOptions Iceberg { get; set; } = new();
         public LiquidityFlowDetectorOptions Liquidity { get; set; } = new();
         public IcebergTrackerOptions IcebergTracker { get; set; } = new();

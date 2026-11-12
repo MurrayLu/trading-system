@@ -40,12 +40,12 @@ namespace MuNTrade.Core.Trading
         private readonly IEventBus _bus;
         private readonly ILogger<LivePositionManager> _logger;
 
-        // ★ 關鍵依賴：價格跳動服務 & 交易規則提供者
+        //  關鍵依賴：價格跳動服務 & 交易規則提供者
         private readonly IPriceTierService _priceTierService;
         private readonly ITradeRulesProvider _tradeRulesProvider;
         private readonly System.Timers.Timer _broadcastTimer;
 
-        // ★ Persistence
+        //  Persistence
         private readonly PositionSnapshotStore _snapshotStore;
         private readonly System.Timers.Timer _snapshotTimer;
         private volatile bool _snapshotDirty;
@@ -83,8 +83,8 @@ namespace MuNTrade.Core.Trading
             _logger.LogInformation("[LivePositionManager] Started. Mode={Mode} (Gateway={Gateway})",
                 _isSimMode ? "SIM" : "LIVE", gateway);
 
-            _bus.Subscribe<QuoteSnapshotEvent>(OnQuoteSnapshot); // [Patch A] Drive by Quote
-            _bus.Subscribe<OrderFillEvent>(UpdatePositionOnFill); // [Patch] Handle Live Fills for real-time update
+            _bus.Subscribe<QuoteSnapshotEvent>(OnQuoteSnapshot); // Drive by Quote
+            _bus.Subscribe<OrderFillEvent>(UpdatePositionOnFill); // Handle Live Fills for real-time update
             _brokerSnapshotToken = _bus.Subscribe<BrokerPositionSnapshotEvent>(OnBrokerSnapshot);
             _brokerMetricsToken = _bus.Subscribe<BrokerPositionMetricsEvent>(OnBrokerPositionMetrics);
             // [Route B] Listen to Mode Change
@@ -158,7 +158,7 @@ namespace MuNTrade.Core.Trading
 
             var incomingSet = new HashSet<string>(incoming.Select(p => p.Symbol), StringComparer.OrdinalIgnoreCase);
 
-            // [Patch 5] Scoped Pruning Logic (Only if Final)
+            // Scoped Pruning Logic (Only if Final)
             // Use AccountKey for Dictionary Pruning
             if (isFinal)
             {
@@ -200,7 +200,7 @@ namespace MuNTrade.Core.Trading
                     Quantity = signedQty,
                     AveragePrice = avgCost,
                     LastPrice = dto.LastPrice,
-                    MarketNo = inferredMarket // [Patch 5]
+                    MarketNo = inferredMarket
                 };
             }
 
@@ -217,7 +217,7 @@ namespace MuNTrade.Core.Trading
 
             BroadcastSnapshot(allowEmpty: true);
 
-            // [Patch] Persist IMMEDIATELY if Final (truth). Ensures "zero positions" is written to file.
+            // Persist IMMEDIATELY if Final (truth). Ensures "zero positions" is written to file.
             if (isFinal)
             {
                 var currentAccountPositions = _positions.Values
@@ -253,7 +253,7 @@ namespace MuNTrade.Core.Trading
             }
 
             // Priority 3: Fallback (Ambiguous -> Do Not Prune)
-            // If we are unsure, we must NOT prune it to avoid accidental data loss.
+            // Keep ambiguous account keys to avoid removing valid positions.
             // exception: if IsLikelyStock is very convincing for Securities scope?
             // "寧可殘留也不要誤殺" -> Return false.
             return false;
@@ -273,16 +273,12 @@ namespace MuNTrade.Core.Trading
                     // Sim Mode: Use "Sim:Paper:All:Default" + any SimAccounts
                     var sim = MuNTrade.Core.Capital.CapitalConfigService.LoadAllSimAccounts();
                     foreach (var a in sim) accountKeys.Add(a.Id);
-                    accountKeys.Add("Sim:Paper:All:Default"); // New V2 Paper Key
-                    // accountKeys.Add("Paper"); // Old compact key? Let's deprecate or map.
-                    // Keep "Paper" if users have old data?
+                    accountKeys.Add("Sim:Paper:All:Default");
                 }
                 else
                 {
                     // Live Mode: "Real"
-                    // var live = MuNTrade.Core.Capital.CapitalConfigService.LoadAllLiveAccounts(); 
-                    // Live account json files are usually Account Profiles, IDs are user defined.
-                    // But effectively we force "Real" for the main one.
+                    // The primary live account uses the "Real" key.
                     accountKeys.Add("Real");
                 }
             }
@@ -381,7 +377,7 @@ namespace MuNTrade.Core.Trading
             if (string.IsNullOrWhiteSpace(e.Symbol)) return;
             if (e.LastPrice <= 0) return; // 沒價就不更新
 
-            // 節流：同一檔 150ms 內最多更新一次（你可以調 100~300ms）
+            // 節流：同一檔 150ms 內最多更新一次（可調 100~300ms）
             var now = DateTime.UtcNow.Ticks;
             var last = _lastPosQuoteUpdateTicks.GetOrAdd(e.Symbol, 0);
             if (now - last < PosQuoteMinIntervalTicks) return;
@@ -390,7 +386,7 @@ namespace MuNTrade.Core.Trading
             var anyChanged = false;
 
             // 只更新「有這檔持倉」的 entries
-            foreach (var kvp in _positions) // 你的 _positions 是 ConcurrentDictionary<(acc,symbol), Position> 或類似
+            foreach (var kvp in _positions)
             {
                 var pos = kvp.Value;
                 if (!string.Equals(pos.StockId, e.Symbol, StringComparison.OrdinalIgnoreCase))
@@ -406,7 +402,7 @@ namespace MuNTrade.Core.Trading
             if (!anyChanged) return;
 
             RecalculateAllPositions();
-            BroadcastSnapshot(allowEmpty: true);   // 這行在舊版 tick 流程就是這樣做的精神
+            BroadcastSnapshot(allowEmpty: true); // Publish the updated position snapshot.
             MarkSnapshotDirty(ResolveDefaultAccount()); // Ensure persistence updates
         }
 
@@ -475,7 +471,6 @@ namespace MuNTrade.Core.Trading
 
         private string ResolveDefaultAccount()
         {
-            // V2: Return Account Key
             return _isSimMode ? "Sim:Paper:All:Default" : "Real";
         }
 
@@ -533,7 +528,7 @@ namespace MuNTrade.Core.Trading
 
                 decimal lastPrice = pos.LastPrice == 0 ? pos.AveragePrice : pos.LastPrice;
                 bool isLong = pos.Quantity > 0;
-                
+
                 // [Net PnL] = Gross - (CostIn + CostOut)
                 decimal grossPnL = (lastPrice - pos.AveragePrice) * pos.Quantity * multiplier;
                 decimal costIn = EstimateOneSideCost(pos.StockId, pos.AveragePrice, pos.Quantity, true, isLong, MuNTrade.Abstractions.Contracts.Market.MarketInfoPurpose.UI);
@@ -597,7 +592,7 @@ namespace MuNTrade.Core.Trading
             {
                 // [Stock] Fee = Value * 0.001425 * Discount
                 decimal fee = Math.Floor(value * 0.001425m * (rules.Stock?.FeeDiscount ?? 1m));
-                
+
                 // [Stock] Tax = Value * TaxRate (Only on SELL side)
                 // Sell side happens when: (Long + !isEntry) OR (!Long + isEntry)
                 bool isSell = (isLong && !isEntry) || (!isLong && isEntry);
@@ -605,12 +600,12 @@ namespace MuNTrade.Core.Trading
                 if (isSell)
                 {
                     // Check if it's DayTrade for tax discount
-                    // Note: In this context, we don't have the entry time easily, 
+                    // Note: In this context, we don't have the entry time easily,
                     // but for general estimation, we use the default TaxRate.
-                    // If we want to be more precise, we'd need more context here.
+                    // The entry time is unavailable here, so the default tax rate is used.
                     tax = Math.Floor(value * (rules.Stock?.TaxRate ?? 0.003m));
                 }
-                
+
                 return fee + tax;
             }
             else // Futures
@@ -618,7 +613,7 @@ namespace MuNTrade.Core.Trading
                 var f = ResolveFutureSpec(symbol, rules);
                 if (f != null)
                 {
-                    // 修正：手續費為雙邊 (round-trip)，因此單邊需除以 2。
+                    // The configured fee is round-trip, so charge half per side.
                     // 使用者表示手續費已包含期交稅，因此 TaxRate 在設定檔中應設為 0。
                     var tax = Math.Floor(price * qty * f.PointValue * (f.TaxRate > 0 ? f.TaxRate : 0));
                     return (f.FeePerOrder / 2m * Math.Abs(qty)) + tax;

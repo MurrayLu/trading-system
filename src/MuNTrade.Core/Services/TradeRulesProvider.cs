@@ -22,7 +22,7 @@ namespace MuNTrade.Core.Services
         private readonly ILogger<TradeRulesProvider> _logger;
 
         public TradeRulesConfig Current { get; private set; } = new();
-        public event Action<TradeRulesConfig> Changed;
+        public event Action<TradeRulesConfig> Changed = _ => { };
 
         public TradeRulesProvider(IEventBus bus, ILogger<TradeRulesProvider> logger)
         {

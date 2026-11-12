@@ -13,10 +13,4 @@ namespace MuNTrade.Abstractions.Settings.Backtest
     }
 
     // 這個類別對應整個 "BacktestSegments" 區段
-    [Obsolete("Legacy - BacktestSegment is obsoleted in new architecture.")]
-    public class BacktestSegmentSettings
-    {
-        // 屬性名稱必須與 appsettings.json 中的 Key "BacktestSegments" 完全一致
-        public List<BacktestSegmentConfig> BacktestSegments { get; set; } = new();
-    }
 }

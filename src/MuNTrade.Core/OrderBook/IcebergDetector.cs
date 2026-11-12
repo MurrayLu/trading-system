@@ -72,7 +72,7 @@ namespace MuNTrade.Core.OrderBook
             private readonly RollingEstimator _ratioBase;
             private readonly RollingEstimator _touchBase;
 
-            // [Patch B] Deterministic Sweep: 改用 ArrivalTs 記錄上次清理時間
+            // Deterministic Sweep: 改用 ArrivalTs 記錄上次清理時間
             private ArrivalTs _lastSweepArrival;
 
             public SymbolState(IcebergDetectorOptions opt, string symbol, IClock clock)
@@ -100,7 +100,7 @@ namespace MuNTrade.Core.OrderBook
             {
                 var events = new List<object>();
                 var occurredAt = new DateTimeOffset(arrival.Value);
-                // [Fix] 根據方向選擇正確的 Dictionary
+                // 根據方向選擇正確的 Dictionary
                 var levels = isBid ? _bidLevels : _askLevels;
                 var state = levels.GetOrAdd(price, _ => new LevelState(_opt));
 
@@ -117,7 +117,7 @@ namespace MuNTrade.Core.OrderBook
                     state.IsActivationOpen = true;
                 }
 
-                // [Phase 0] Queue Rebuild Filter
+                // Queue Rebuild Filter
                 // If this is a replenish (delta > 0), check if worse price dropped simultaneously
                 bool isQueueRebuild = false;
                 if (deltaQty > 0)
@@ -155,19 +155,7 @@ namespace MuNTrade.Core.OrderBook
 
                 if (isQueueRebuild)
                 {
-                    // If queue rebuild, the positive delta is just order shifting, not hidden refill.
-                    // We discount the replenish amount. 
-                    // If matchedVol exists, it stays. But usually Rebuild is pure book update? 
-                    // If trade happened, matchedVol > 0.
-                    // Replenish = Delta + Matched. 
-                    // If Delta is shift, Replenish should be Matched only (or 0 if Delta covered Matched?).
-                    // Logic: "Replenish" means "New Limit Order". 
-                    // If Delta came from neighbor, it's not new.
-                    // So we subtract the Shifted amount?
-                    // Simple approach: Zero out Replenish contribution from Delta.
-                    // Replenish = Matched; (Assuming deltaQty was the shift).
-                    // Or Strict: replenished = 0? 
-                    // Let's set it to Math.Max(0, matchedVol); basically ignoring deltaQty's positive contribution.
+                    // Queue shifts do not count as replenishment; use matched volume only.
                     replenished = matchedVol;
                 }
 
@@ -188,7 +176,7 @@ namespace MuNTrade.Core.OrderBook
 
                 state.LastSeenArrival = arrival;
 
-                // [Fix] Baseline 保護 + Stale 護欄
+                // Baseline 保護 + Stale 護欄
                 if (!isStale)
                 {
                     _matchedBase.Add(matchedVol);
@@ -289,7 +277,7 @@ namespace MuNTrade.Core.OrderBook
                         if (totalScore < 0.1 || gap > _opt.ttl_sec)
                         {
                             state.UiStatus = IcebergDisplayStatus.None;
-                            state.LastPublishedStatus = IcebergDisplayStatus.None; // [Fix] Reset status
+                            state.LastPublishedStatus = IcebergDisplayStatus.None; // Reset status
                             state.IsActivationOpen = false;
                             events.Add(new IcebergClearedEvent(_symbol, price, isBid, arrival)
                             {
@@ -309,7 +297,7 @@ namespace MuNTrade.Core.OrderBook
 
                 if (confirmed)
                 {
-                    // [Fix] 狀態變更 (Edge Trigger) 才發送 Confirmed (首次確認)
+                    // 狀態變更 (Edge Trigger) 才發送 Confirmed (首次確認)
                     if (state.LastPublishedStatus != IcebergDisplayStatus.Confirmed)
                     {
                         state.LastConfirmedArrival = arrival;
@@ -338,7 +326,7 @@ namespace MuNTrade.Core.OrderBook
                     }
                     else if (state.CanPublishConfirmed(arrival, _opt.confirmed_min_gap_sec))
                     {
-                        // [Fix] 若已確認且隔了一段時間，改發 Persist (持續)，避免重複洗版 "冰山確認"
+                        // 若已確認且隔了一段時間，改發 Persist (持續)，避免重複洗版 "冰山確認"
                         state.LastConfirmedArrival = arrival;
                         // Duration: 從最開始懷疑到現在
                         double duration = state.LastSuspectArrival != default
@@ -359,8 +347,7 @@ namespace MuNTrade.Core.OrderBook
                 }
                 else if (suspect)
                 {
-                    // [Fix] Hysteresis: If we are already visually Confirmed, do NOT downgrade event status to Suspect.
-                    // This prevents "Confirmed -> Suspect -> Confirmed" flickering which triggers repeated "Confirmed" events.
+                    // Keep confirmed states from publishing a lower Suspect status.
                     if (state.UiStatus != IcebergDisplayStatus.Confirmed && state.CanPublishSuspect(arrival, _opt.suspect_min_gap_sec))
                     {
                         state.LastPublishedStatus = IcebergDisplayStatus.Suspect;
@@ -394,7 +381,7 @@ namespace MuNTrade.Core.OrderBook
 
             private void Sweep(ArrivalTs now)
             {
-                // [Patch B] 改用 ArrivalTs 計算時間差，確保回測與實盤行為一致 (Deterministic)
+                // 改用 ArrivalTs 計算時間差，確保回測與實盤行為一致 (Deterministic)
                 // 只有當差距大於 30 秒 (牆鐘或模擬時間) 才執行清理
                 if (_lastSweepArrival != default && (now - _lastSweepArrival).TotalSeconds < 30) return;
                 _lastSweepArrival = now;
@@ -460,7 +447,7 @@ namespace MuNTrade.Core.OrderBook
             public double Confidence { get; set; }
             public double AbsorptionPct { get; set; }
             public ArrivalTs LastTouched { get; set; }
-            public IcebergDisplayStatus LastPublishedStatus { get; set; } // [New] Track emitted status
+            public IcebergDisplayStatus LastPublishedStatus { get; set; } // Track emitted status
             public bool IsActivationOpen { get; set; }
 
             public LevelState(IcebergDetectorOptions opt)

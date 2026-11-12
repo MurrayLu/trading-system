@@ -29,7 +29,7 @@ namespace MuNTrade.Abstractions.Contracts.Data
         // 取「目前開著的棒」的快照（若有）
         bool TryGetOpenBar(string symbol, BarConfig cfg, out DynamicBar? snapshot);
 
-        // 由外界在關棒/partial 時回寫最新的 open 狀態（你可在 OnBarPartial/OnBarClosed 時呼叫）
+        // 由外界在關棒/partial 時回寫最新的 open 狀態（可在 OnBarPartial/OnBarClosed 時呼叫）
         void UpsertOpenBar(DynamicBar bar);
     }
 }

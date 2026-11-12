@@ -27,7 +27,7 @@ namespace MuNTrade.Abstractions.Domain.MarketData
         [JsonPropertyName("Qty")]
         public long Qty { get; set; }
 
-        // 如果你之前用 Volume/From/To，建議保留對應的舊屬性（非序列化）以便程式內部相容
+        // 若之前用 Volume/From/To，建議保留對應的舊屬性（非序列化）以便程式內部相容
         [JsonIgnore]
         public DateTime From => KlineTime;
 

@@ -1,5 +1,4 @@
-﻿// MuNTrade.Core/Services/PlaybackControlService.cs
-
+﻿
 using System;
 using System.Threading.Tasks;
 

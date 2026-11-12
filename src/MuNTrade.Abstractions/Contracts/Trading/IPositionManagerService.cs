@@ -1,5 +1,4 @@
-﻿// 建議路徑: MuNTrade.Abstractions/Interfaces/Services/IPositionManagerService.cs
-
+﻿
 using MuNTrade.Abstractions.Domain.MarketData;
 using MuNTrade.Abstractions.Domain.Trading;
 using MuNTrade.Abstractions.Domain.Capital;
@@ -12,7 +11,7 @@ namespace MuNTrade.Abstractions.Contracts.Trading
     public interface IPositionManagerService
     {
         /// <summary>
-        /// ★★★ 新增：定義處理策略訊號的公開方法 ★★★
+        /// Processes a strategy signal.
         /// 這是 BacktestEngine 或其他訊號來源呼叫的入口點。
         /// </summary>
         void ProcessSignal(SignalEvent signal);

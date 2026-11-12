@@ -14,7 +14,7 @@
         public string LiveAccountDataPath { get; set; } = string.Empty;
         public string TradeRulesDataPath { get; set; } = string.Empty;
 
-        // [Segmented Recording] 讀取設定 (R3)
+        // Settings for segmented recording.
         public bool TickAllowReadLivePartialFiles { get; set; } = false;
     }
 }

@@ -1,5 +1,4 @@
-﻿// MuNTrade.Core/Services/SessionFilterService.cs (雙模式最終版)
-
+﻿
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MuNTrade.Abstractions.Domain.MarketData;
@@ -7,7 +6,7 @@ using MuNTrade.Abstractions.Domain.Trading;
 using MuNTrade.Abstractions.Domain.Capital;
 using MuNTrade.Abstractions.Domain.Optimization;
 using MuNTrade.Abstractions.Domain.Session;
-using MuNTrade.Abstractions.Contracts.Hubs;    // ★ 引用 IEventBus
+using MuNTrade.Abstractions.Contracts.Hubs;    //  引用 IEventBus
 using MuNTrade.Abstractions.Domain.MarketData.Channels;
 using MuNTrade.Abstractions.Events.MarketData;
 using MuNTrade.Abstractions.Events.OrderBook;
@@ -26,13 +25,12 @@ using MuNTrade.Abstractions.Time;
 
 namespace MuNTrade.Core.Services
 {
-    // ★ 修改：繼承自 BackgroundService 以支援 LIVE 模式自動啟動
     public class SessionFilterService : BackgroundService
     {
         private readonly ILogger<SessionFilterService> _logger;
         private readonly ChannelReader<TickData> _rawTickReader;
         private readonly ITradingSessionProvider _sessionProvider;
-        private readonly IEventBus _eventBus; // ★ 核心修改：直接注入 IEventBus
+        private readonly IEventBus _eventBus;
         private readonly IClock _clock;
 
         public SessionFilterService(
@@ -40,7 +38,7 @@ namespace MuNTrade.Core.Services
             RawTickChannel rawTickChannel,
             ITradingSessionProvider sessionProvider,
             IEventBus eventBus,
-            IClock clock) // ★ 移除 IServiceProvider，改為 IEventBus
+            IClock clock) //  移除 IServiceProvider，改為 IEventBus
         {
             _logger = logger;
             _rawTickReader = rawTickChannel.Reader;
@@ -50,7 +48,7 @@ namespace MuNTrade.Core.Services
         }
 
         /// <summary>
-        /// ★ 保留：這個公開方法是給 BacktestEngine 手動呼叫的，用於同步處理單筆 Tick
+        ///  保留：這個公開方法是給 BacktestEngine 手動呼叫的，用於同步處理單筆 Tick
         /// </summary>
         public TickData? ProcessTick(TickData tick)
         {
@@ -83,12 +81,12 @@ namespace MuNTrade.Core.Services
 
 
         /// <summary>
-        /// ★ 保留：提供給 Backtest/UI 模式手動呼叫的公開方法
+        ///  保留：提供給 Backtest/UI 模式手動呼叫的公開方法
         /// </summary>
         public Task RunAsync(CancellationToken stoppingToken) => ExecuteAsync(stoppingToken);
 
         /// <summary>
-        /// ★ 新增：這是 BackgroundService 的核心執行迴圈，供 LIVE 模式自動啟動
+        /// Keeps the hosted service alive while session events are processed.
         /// </summary>
         // ExecuteAsync 是唯一需要 Hub 的地方，所以我們在這裡解析它
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -102,7 +100,6 @@ namespace MuNTrade.Core.Services
                     var filteredTick = ProcessTick(tick);
                     if (filteredTick != null)
                     {
-                        // ★ 核心修改：將過濾後的 TickData 轉換為 TradeTickEvent 並發布
                         var tradeEvent = new TradeTickEvent
                         {
                             Symbol = filteredTick.StockId,

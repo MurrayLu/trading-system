@@ -1,12 +1,11 @@
-﻿// MuNTrade.Infrastructure/Services/HistoricalKlineDownloader.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization; // 確保檔案頂端有這個 using
 using System.Linq; // for GroupBy / LINQ
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using MuNTrade.Abstractions.Contracts.Brokers;   // 你的 Broker 介面
+using MuNTrade.Abstractions.Contracts.Brokers;
 using MuNTrade.Infrastructure.DataAccess.FileSystem;
 using MuNTrade.Abstractions.Domain.MarketData;
 using MuNTrade.Abstractions.Domain.Trading;
@@ -47,8 +46,7 @@ namespace MuNTrade.Infrastructure.DataAccess.Downloaders
 
         /// <summary>
         /// 下載指定 symbol/timeframeKey 的 K 線資料 (start ~ lcd)
-        /// 修正重點：即使 Broker 回傳範圍超出請求區間，我們也會在 parse 後強制 clip 到 [start, lcd]。
-        /// 同時在儲存時以月份為單位覆寫同月舊檔（HistoricalDataReader.SaveMonthlyRollingAsync 的行為）。
+        /// Clips broker results to the requested date range before saving monthly files.
         /// </summary>
         public async Task<IReadOnlyList<JsonKLineRecord>> DownloadAsync(
             string symbol, string timeframeKey, DateOnly start, DateOnly lcd, CancellationToken ct = default)
@@ -66,7 +64,6 @@ namespace MuNTrade.Infrastructure.DataAccess.Downloaders
                 var (kType, minute, prefix) = Map(timeframeKey);
 
                 // 1) 嘗試 single request（一次請足整段 start~lcd）
-                var singleSucceeded = false;
                 try
                 {
                     var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -117,7 +114,6 @@ namespace MuNTrade.Infrastructure.DataAccess.Downloaders
 
                     if (lines.Count > 0)
                     {
-                        singleSucceeded = true;
                         _log.LogDebug("[K線下載] {Sym}|{Tf} single-request returned {Count} lines", symbol, timeframeKey, lines.Count);
                     }
                     else
@@ -142,7 +138,7 @@ namespace MuNTrade.Infrastructure.DataAccess.Downloaders
                         ct.ThrowIfCancellationRequested();
                         _log.LogInformation("[DL] {Sym}|{Tf} chunk {S}~{E}", symbol, timeframeKey, s, e);
                         ExecuteKlineRequest(symbol, timeframeKey, kType, s, e, minute);
-                        // 原本是 await Task.Delay(500): 為了簡單保守保留，但建議改成事件完成 Signal（如同 single-case）
+                        // Wait for the broker request to finish collecting its response lines.
                         await Task.Delay(500, ct);
                     }
                 }
@@ -150,7 +146,7 @@ namespace MuNTrade.Infrastructure.DataAccess.Downloaders
                 // 3) parse collected lines → records
                 var records = ParseToRecords(lines, timeframeKey);
 
-                // 4) **關鍵修正**：強制過濾(clip)到 [start, lcd] 範圍內的紀錄
+                // Keep records within the requested date range.
                 DateTime startDt = start.ToDateTime(TimeOnly.MinValue);
                 DateTime lcdDt = lcd.ToDateTime(new TimeOnly(23, 59, 59)); // 包含當日整天
                 var clipped = records.Where(r => r.KlineTime >= startDt && r.KlineTime <= lcdDt).ToList();

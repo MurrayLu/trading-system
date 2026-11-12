@@ -29,8 +29,8 @@ namespace MuNTrade.Core.Settings
         public decimal MaxEquity { get; set; }
         public decimal RiskPercent { get; set; }
         public decimal GoldenNumber { get; set; } // 最大每股風險容忍值
-        public decimal UpgradeAt { get; set; }    // [New] 升級門檻 (Hysteresis Upper Bound)
-        public decimal DowngradeAt { get; set; }  // [New] 降級門檻 (Hysteresis Lower Bound)
+        public decimal UpgradeAt { get; set; }    // 升級門檻 (Hysteresis Upper Bound)
+        public decimal DowngradeAt { get; set; }  // 降級門檻 (Hysteresis Lower Bound)
     }
 
     public class FuturesRulesOptions

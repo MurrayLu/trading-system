@@ -17,7 +17,6 @@ namespace MuNTrade.Abstractions.Contracts.Time
         /// </summary>
         DateOnly GetNextTradingDay(DateOnly date);
 
-        // --- 直接在這裡新增方法 ---
         /// <summary>
         /// 獲取給定日期之前的上一個有效交易日。
         /// </summary>

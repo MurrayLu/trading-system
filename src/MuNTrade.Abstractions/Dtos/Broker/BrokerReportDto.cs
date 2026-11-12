@@ -10,13 +10,11 @@ namespace MuNTrade.Abstractions.Dtos.Broker
     {
         public ExchangeTs ExchangeTs { get; init; }
         public ArrivalTs ArrivalTs { get; init; }
-        [Obsolete("Use ExchangeTs or ArrivalTs")]
-        public DateTime Timestamp => ExchangeTs.Value;
         public DateTime Time => ExchangeTs.Value; // Alias for UI binding
 
         // Core fields required by Blotter and Dock
         public string Action { get; init; } = "Unknown"; // e.g. New, Cancel, Trade
-        public string Market { get; init; } = "Stock";   // [New] Stock/Future
+        public string Market { get; init; } = "Stock";   // Stock/Future
         public string Side { get; init; } = "";          // Buy/Sell
         public decimal Price { get; init; }              // Order Price or Trade Price
         public int Quantity { get; init; }               // Order Qty or Trade Qty
@@ -36,16 +34,16 @@ namespace MuNTrade.Abstractions.Dtos.Broker
         public int? AccLatencyMs { get; init; }   // Intent → FullFill
         public decimal? Slippage { get; init; }   // Fill - Decision
 
-        // [New] 帳戶區分 (Paper/Live)
+        // 帳戶區分 (Paper/Live)
         public string Account { get; init; } = "";
 
-        // [New] 委託書號 (BookNo)
+        // 委託書號 (BookNo)
         public string BookNo { get; init; } = "";
 
-        // [New] 券商序號 (SeqNo)
+        // 券商序號 (SeqNo)
         public string SeqNo { get; init; } = "";
 
-        // [New] 原始數量 (API Raw Quantity, e.g. shares for stocks) - 用於改量計算
+        // 原始數量 (API Raw Quantity, e.g. shares for stocks) - 用於改量計算
         public int RawQuantity { get; init; }
     }
 }

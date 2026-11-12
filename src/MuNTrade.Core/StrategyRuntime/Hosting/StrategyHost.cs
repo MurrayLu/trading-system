@@ -20,10 +20,10 @@ namespace MuNTrade.Core.StrategyRuntime.Hosting
         private readonly ILogger<StrategyHost> _logger;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IStrategyRegistry _registry;
-        private readonly MuNTrade.Abstractions.Contracts.Market.IMarketInfoProvider _marketInfo; // [10C]
+        private readonly MuNTrade.Abstractions.Contracts.Market.IMarketInfoProvider _marketInfo;
 
         private readonly ConcurrentDictionary<StrategyInstanceId, StrategyInstanceRuntime> _instances = new();
-        private volatile StrategyInstanceStatus[] _runningSnapshot = Array.Empty<StrategyInstanceStatus>(); // Refined 10B: Snapshot
+        private volatile StrategyInstanceStatus[] _runningSnapshot = Array.Empty<StrategyInstanceStatus>(); // Snapshot
 
         public StrategyHost(
             IEventBus eventBus,
@@ -70,12 +70,12 @@ namespace MuNTrade.Core.StrategyRuntime.Hosting
                     runtime.InstanceId,
                     runtime.Strategy.TemplateId,
                     MuNTrade.Core.StrategyRuntime.StrategyIdentity.BuildStrategyId(runtime.Strategy.TemplateId.Value, runtime.InstanceId.Value),
-                    runtime.AccountKey, // [10C] Pinned Key (from Runtime directly)
+                    runtime.AccountKey, // Pinned Key (from Runtime directly)
                     StrategyState.Running,
                     runtime.State,
                     runtime.Strategy.Subscriptions,
-                    runtime.Strategy as Abstractions.Contracts.Strategy.IStrategyIngressSpec, // [New] 12-2 Spec Filter
-                    runtime.RunGeneration, // Refined 10B: Version
+                    runtime.Strategy as Abstractions.Contracts.Strategy.IStrategyIngressSpec,
+                    runtime.RunGeneration, // Version
                     runtime.LastSeenAt))
                 .ToArray();
         }
@@ -94,11 +94,11 @@ namespace MuNTrade.Core.StrategyRuntime.Hosting
                     runtime.InstanceId,
                     runtime.Strategy.TemplateId,
                     MuNTrade.Core.StrategyRuntime.StrategyIdentity.BuildStrategyId(runtime.Strategy.TemplateId.Value, runtime.InstanceId.Value),
-                    runtime.AccountKey, // [10C] Pinned Key (from Runtime directly)
+                    runtime.AccountKey, // Pinned Key (from Runtime directly)
                     StrategyState.Running,
                     runtime.State,
                     runtime.Strategy.Subscriptions,
-                    runtime.Strategy as Abstractions.Contracts.Strategy.IStrategyIngressSpec, // [New] 12-2 Spec Filter
+                    runtime.Strategy as Abstractions.Contracts.Strategy.IStrategyIngressSpec,
                     runtime.RunGeneration,
                     runtime.LastSeenAt)) // LastSeenAt in snapshot might appear slightly stale but acceptable for routing config
                 .ToArray();
@@ -160,8 +160,7 @@ namespace MuNTrade.Core.StrategyRuntime.Hosting
 
         public async Task<StrategyInstanceId> StartInstanceAsync(StrategyRecipeId recipeId, string accountKey, CancellationToken cancellationToken = default)
         {
-            // For MVP S1: Expect recipeId.Value to match TemplateId
-            // In real world, we would look up Recipe from Store, get TemplateId from Recipe.
+            // The recipe ID is used as the template ID.
             var templateIdString = recipeId.Value;
 
             var template = _registry.Templates.FirstOrDefault(t => t.TemplateId.Value == templateIdString);
@@ -178,8 +177,7 @@ namespace MuNTrade.Core.StrategyRuntime.Hosting
             // Create Context
             var strategyLogger = _loggerFactory.CreateLogger($"Strategy.{template.TemplateId.Value}.{instanceId.Value}");
 
-            // [10C] Pinning Logic
-            // Inject MarketInfo and Pinned AccountKey into Router and Context
+            // Inject market information and the runtime account key into the strategy context.
             var outputRouter = new Routing.StrategyOutputRouter(_eventBus, _clock, _marketInfo, accountKey);
             var context = new StrategyRuntimeContext(_eventBus, _clock, strategyLogger, outputRouter, accountKey);
 
@@ -188,7 +186,7 @@ namespace MuNTrade.Core.StrategyRuntime.Hosting
             // Pass accountKey to Runtime as well for Status exposure
             var runtime = new StrategyInstanceRuntime(strategy, _clock, strategyLogger, accountKey);
 
-            // [New] Configure Router State Accessor for Gating using STRICT Runtime State
+            // Configure Router State Accessor for Gating using STRICT Runtime State
             outputRouter.ConfigureStateAccessor(() => runtime.State);
 
             await runtime.StartAsync(cancellationToken);

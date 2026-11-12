@@ -18,8 +18,8 @@ namespace MuNTrade.Core.Services
 {
     /// <summary>
     /// Trade history store.
-    /// - In-memory for UI
-    /// - JSONL append for persistence
+    ///In-memory for UI
+    ///JSONL append for persistence
     /// </summary>
     public class TradeHistoryService
     {

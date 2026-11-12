@@ -49,7 +49,7 @@ namespace MuNTrade.Core.Trading.Adapters
             _clock = clock;
             _marketInfoProvider = marketInfoProvider;
 
-            // [Fix] 註冊 CodePages 以支援 Big5 (CodePage 950)
+            // 註冊 CodePages 以支援 Big5 (CodePage 950)
             // 這是 .NET Core / .NET 5+ 必須的
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
@@ -182,7 +182,7 @@ namespace MuNTrade.Core.Trading.Adapters
                     Side = side,
                     Price = price,
                     Quantity = (int)displayQty, // 這裡傳遞的是「變動量」
-                    RawQuantity = (int)rawQty,  // [New] 傳遞原始量，供改量使用
+                    RawQuantity = (int)rawQty,  // 傳遞原始量，供改量使用
                     Status = status,
                     Action = actionType,
                     Message = displayMsg,
@@ -190,7 +190,7 @@ namespace MuNTrade.Core.Trading.Adapters
                     BookNo = bookNo,
                     SeqNo = seqNo,
                     ReportType = "Real",
-                    Account = "Real", // [Fix] Live 預設為 Real
+                    Account = "Real", // Live 預設為 Real
                     Level = "Info"
                 };
 
@@ -246,7 +246,7 @@ namespace MuNTrade.Core.Trading.Adapters
                 // [7] CorrelationId
                 string corrId = parts.Length > 7 ? parts[7] : "";
 
-                // --- 統一轉換邏輯 (讓模擬單也顯示與 Live 一致的中文) ---
+                //統一轉換邏輯 (讓模擬單也顯示與 Live 一致的中文) ---
 
                 // 1. 市場推測
                 // [SOP-Strict]
@@ -305,7 +305,7 @@ namespace MuNTrade.Core.Trading.Adapters
                     Action = action,
                     Message = "模擬交易正常", // Paper Trading 預設訊息
                     CorrelationId = corrId,
-                    BookNo = bookNo, // [Fix] Include Parsed BookNo
+                    BookNo = bookNo, // Include Parsed BookNo
                     SeqNo = "",
                     ReportType = "Paper",
                     Level = "Info"
@@ -321,7 +321,7 @@ namespace MuNTrade.Core.Trading.Adapters
 
         #endregion
 
-        // [Fix] 用來修復亂碼的工具方法 (使用 SKCOM 特有的還原邏輯)
+        // 用來修復亂碼的工具方法 (使用 SKCOM 特有的還原邏輯)
         private string RepairBig5(string text)
         {
             if (string.IsNullOrWhiteSpace(text)) return text;

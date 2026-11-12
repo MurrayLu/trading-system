@@ -14,7 +14,7 @@ namespace MuNTrade.Core.StrategyRuntime.Hosting
         }
 
         public IEnumerable<IStrategyTemplate> Templates => _templates;
-        
+
         public IStrategyTemplate? FindTemplate(string templateIdValue)
         {
              return _templates.FirstOrDefault(t => t.TemplateId.Value == templateIdValue);

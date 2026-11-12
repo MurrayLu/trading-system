@@ -12,8 +12,8 @@ namespace MuNTrade.Core.StrategyRuntime.Routing
     {
         private readonly IEventBus _eventBus;
         private readonly IClock _clock;
-        private readonly MuNTrade.Abstractions.Contracts.Market.IMarketInfoProvider _marketInfo; // [10C]
-        private readonly string _pinnedAccountKey; // [10C]
+        private readonly MuNTrade.Abstractions.Contracts.Market.IMarketInfoProvider _marketInfo;
+        private readonly string _pinnedAccountKey;
         private Func<StrategyRuntimeState>? _stateAccessor;
 
         public StrategyOutputRouter(
@@ -43,8 +43,7 @@ namespace MuNTrade.Core.StrategyRuntime.Routing
             string actionCode,
             object? payload = null)
         {
-            // Helper to bridge payload object to dictionaries if needed, or just allow flexible construction
-            // For now, adhere to Strict Event contract
+            // Publish strategy output through the event contract.
             var evt = new StrategyPacketEmittedEvent(
                 templateId,
                 instanceId,
@@ -106,7 +105,7 @@ namespace MuNTrade.Core.StrategyRuntime.Routing
             object payloadToEmit = intent;
             if (intent is MuNTrade.Abstractions.Dtos.Trading.OrderIntent orderIntent)
             {
-                // 1. AccountKey Pinning
+                // Use the host account key when the intent has none.
                 var finalAccountKey = string.IsNullOrWhiteSpace(orderIntent.AccountKey)
                     ? _pinnedAccountKey
                     : orderIntent.AccountKey;
@@ -114,17 +113,11 @@ namespace MuNTrade.Core.StrategyRuntime.Routing
                 // Enforce strictly
                 if (string.IsNullOrWhiteSpace(finalAccountKey))
                 {
-                    // Log or just drop? Strict mode says reject.
-                    // Since we can't emit rejection event back easily here without structure, we just drop/log.
-                    // Ideally we should log a System Error packet OR throw if we want to be noisy.
-                    // For safety, we drop.
+                    // Drop the intent when no account key is available.
                     return;
                 }
 
-                // 2. Market Pinning [10C]
-                // We must perform Market Truth Resolution here.
-                // If this fails (throws), it will crash the strategy logic safely (stop it).
-                // GetMarketInfoOrThrow is appropriate for Execution path.
+                // Resolve the symbol's market before publishing the intent.
                 var marketInfo = _marketInfo.GetMarketInfoOrThrow(
                     orderIntent.Symbol,
                     MuNTrade.Abstractions.Contracts.Market.MarketInfoPurpose.Risk // Using Risk strictness for Intent

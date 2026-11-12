@@ -1,5 +1,4 @@
-﻿// 檔案路徑: MuNTrade.Abstractions/Domain/Models/DataSegment.cs (v1.2 - JSON 同步版)
-
+﻿
 using System;
 using System.Text.Json.Serialization;
 
@@ -7,7 +6,7 @@ namespace MuNTrade.Abstractions.Domain.Optimization
 {
     /// <summary>
     /// 代表一段用於回測或分析的資料區間。
-    /// 【v1.2】修改結構以匹配 appsettings.json 的格式。
+    /// Data segment settings loaded from appsettings.json.
     /// </summary>
     public class DataSegment
     {

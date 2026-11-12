@@ -26,13 +26,6 @@ namespace MuNTrade.Abstractions.Domain.MarketData
         /// </summary>
         public MarketSource Source { get; set; }
 
-        [Obsolete("Use ExchangeTs instead")]
-        public DateTime Timestamp
-        {
-            get => ExchangeTs.Value;
-            set => ExchangeTs = new ExchangeTs(value);
-        }
-
         public ExchangeTs ExchangeTs { get; set; }
         public ArrivalTs ArrivalTs { get; set; }
 

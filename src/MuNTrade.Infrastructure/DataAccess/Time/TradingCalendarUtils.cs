@@ -1,5 +1,4 @@
-﻿// MuNTrade.Infrastructure/Time/TradingCalendarUtils.cs
-using MuNTrade.Abstractions.Contracts.Time;
+﻿using MuNTrade.Abstractions.Contracts.Time;
 using System;
 using System.Collections.Generic;
 
@@ -7,7 +6,7 @@ namespace MuNTrade.Infrastructure
 {
     public static class TradingCalendarUtils
     {
-        /// <summary>是否為交易日（預設 Mon..Fri；你可在外層加上假日表過濾）。</summary>
+        /// <summary>是否為交易日（預設 Mon..Fri；可在外層加上假日表過濾）。</summary>
         public static bool IsTradingDay(DateOnly d, HashSet<DateOnly>? holidays = null)
         {
             if (d.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday) return false;

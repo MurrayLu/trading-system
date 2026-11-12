@@ -76,14 +76,12 @@ namespace MuNTrade.Core.Services
 
         public void RequestFullSync(string reason)
         {
-            // Guard: SIM Mode Check [Fix for REJECTED noise]
+            // In SIM mode, ignore expected rejected-order noise.
             var gateway = _appSettings.CurrentValue?.TradingGateway;
             if (string.IsNullOrEmpty(gateway) ||
                 (!gateway.Equals("LIVE", StringComparison.OrdinalIgnoreCase) && !gateway.Equals("REAL", StringComparison.OrdinalIgnoreCase)))
             {
-                // Silent drop or debug log? User called it "REJECTED noise", so let's keep it quiet or Info.
-                // But wait, if reason is "BrokerConnected", it means SKCOM connected even in SIM mode (for Quote).
-                // So we should just Return without syncing Positions.
+                // Ignore rejected-order noise in simulation mode; the broker may still provide quotes.
                 _logger.LogInformation("[BrokerSync] Skipped Position Sync ({Reason}) - Gateway={GW} (SIM Mode).", reason, gateway);
                 return;
             }
@@ -146,12 +144,7 @@ namespace MuNTrade.Core.Services
         private async Task MonitorSyncTimeoutAsync(string syncId)
         {
             await Task.Delay(5000); // 5 seconds timeout check
-            // Ideally we check if "Completed" events arrived.
-            // But we don't have easy access to that state here without subscribing.
-            // For now, this is just a placeholder or could be enhanced if we want strict timeout logging.
-            // Since the user directive says "Timeout policy: Log only, do NOT clear",
-            // and the clearing logic is event-driven in Manager/Adapter, we are safe.
-            // The Adapter doesn't "wait" indefinitely in a blocking way, it just ignores old syncIds if a new one comes.
+            // Completion is handled by the manager or adapter through subsequent events.
         }
 
         private async Task EnsureInitialSyncAsync(CancellationToken ct)

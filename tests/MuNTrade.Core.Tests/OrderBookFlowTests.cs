@@ -18,7 +18,6 @@ using MuNTrade.Abstractions.Contracts.Time;
 using MuNTrade.Abstractions.Time;
 using MuNTrade.Core.OrderBook;
 using MuNTrade.Core.Settings;
-using MuNTrade.Core.Trading.Slice1;
 using MuNTrade.Abstractions.Domain.Session;
 using MuNTrade.Abstractions.Settings.Common;
 using MuNTrade.Abstractions.Settings.Data;
@@ -61,7 +60,7 @@ public sealed class OrderBookFlowTests
     {
         public T CurrentValue { get; }
         public DummyOptionsMonitor(T val) => CurrentValue = val;
-        public T Get(string name) => CurrentValue;
+        public T Get(string? name) => CurrentValue;
         public IDisposable OnChange(Action<T, string> listener) => new DisposableStub();
         private class DisposableStub : IDisposable { public void Dispose() { } }
     }
@@ -100,6 +99,21 @@ public sealed class OrderBookFlowTests
         var a = new List<PriceLevel>(asks.Length);
         foreach (var x in asks) a.Add(new PriceLevel(x.p, x.v));
         return new Best5DeltaEvent(sym, new ArrivalTs(ts), b, a, MuNTrade.Abstractions.Domain.Common.Enums.MarketNo.Unknown, MuNTrade.Abstractions.Domain.Common.Enums.MarketSource.Domestic);
+    }
+
+    [Fact]
+    public void JoinerOrphanRate_LowersQualityScore()
+    {
+        var (engine, bus) = NewEngine();
+        var now = new FixedClock().Now;
+
+        engine.OnJoinerHealth(new JoinerHealthEvent("TXF", new ArrivalTs(now.AddMilliseconds(-10)), 0.9, 0.0));
+        engine.OnBest5(MakeSnap("TXF", now,
+            new[] { (100m, 10) },
+            new[] { (101m, 10) }));
+
+        var quality = Assert.Single(bus.Events.OfType<OrderBookQualityEvent>());
+        Assert.InRange(quality.Score, 0.72, 0.74);
     }
 
     // 1) Price Shift：best1 變價 → 期望 Add=0/Pull=0

@@ -1,5 +1,4 @@
-﻿// MuNTrade.Infrastructure.DataAccess.Selectors.TurnoverSymbolSelector.cs
-using CsvHelper;
+﻿using CsvHelper;
 using CsvHelper.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

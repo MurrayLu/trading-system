@@ -13,7 +13,7 @@ using MuNTrade.Abstractions.Domain.MarketData;
 using MuNTrade.Abstractions.Domain.Trading;
 using MuNTrade.Abstractions.Domain.Capital;
 using MuNTrade.Abstractions.Domain.Optimization;
-using MuNTrade.Abstractions.Domain.Session;                 // Position (類型存在於你的 Abstractions)
+using MuNTrade.Abstractions.Domain.Session;
 using MuNTrade.Core.Trading;                               // LivePositionManager
 
 namespace MuNTrade.Core.Services.Dashboard
@@ -25,8 +25,8 @@ namespace MuNTrade.Core.Services.Dashboard
 
     /// <summary>
     /// 最小可用的部位快照提供者：
-    /// - 優先從 LivePositionManager 讀「開倉」列表（只用得到的欄位：StockId, Quantity）
-    /// - 其它價格/成本相關欄位先置 0（之後再接真實來源）
+    ///優先從 LivePositionManager 讀「開倉」列表（只用得到的欄位：StockId, Quantity）
+    ///其它價格/成本相關欄位先置 0（之後再接真實來源）
     /// </summary>
     public sealed class PositionsSnapshotProvider : IPositionsSnapshotProvider
     {
@@ -58,7 +58,7 @@ namespace MuNTrade.Core.Services.Dashboard
                         Side = p.Quantity >= 0 ? OrderSide.Buy : OrderSide.Sell,
                         Quantity = qtyAbs,
 
-                        // [Fix] Map Account and Pricing data from Position
+                        // Map Account and Pricing data from Position
                         Account = p.Account,
                         AccountKey = string.IsNullOrWhiteSpace(p.AccountKey) ? p.Account : p.AccountKey,
                         AverageCost = p.AveragePrice,

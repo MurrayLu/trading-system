@@ -1,5 +1,4 @@
-﻿// MuNTrade.Abstractions/Settings/ApplicationSettings.cs
-using MuNTrade.Abstractions.Domain.Enums.SystemEnums;
+﻿using MuNTrade.Abstractions.Domain.Enums.SystemEnums;
 
 namespace MuNTrade.Abstractions.Settings.Common
 {

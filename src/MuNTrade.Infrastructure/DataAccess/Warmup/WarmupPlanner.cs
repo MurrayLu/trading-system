@@ -40,13 +40,13 @@ namespace MuNTrade.Infrastructure.DataAccess.Warmup
             var tfOpt = _opt.Timeframes[tf];
 
 
-            // -------------------------
+
             // ✅ 將 RequiredBars 明確等於 MinBars（不要以 SMA 導出）
-            // -------------------------
-            var requiredBars = tfOpt.MinBars; // <-- 改成直接用 MinBars
+
+            var requiredBars = tfOpt.MinBars; // Uses the configured minimum bar count.
 
 
-            // RequiredDays：若設定有指定，直接用；否則估算（保留你原先的 day-estimation 行為）
+            // RequiredDays：若設定有指定，直接用；否則估算（保留既有的 day-estimation 行為）
             int requiredDays;
             if (tfOpt.RequiredDays.HasValue && tfOpt.RequiredDays.Value > 0)
             {
@@ -91,10 +91,10 @@ namespace MuNTrade.Infrastructure.DataAccess.Warmup
 
     /// <summary>
     /// Warmup 規劃的設定檔。
-    /// - Timeframes：各 timeframe 的客製規則（SMA 週期、MinBars、RequiredDays 等）
-    /// - TradingMinutesPerDay：分K換算用的每日交易分鐘（預設 360；你可設更貼近市場）
-    /// - PaddingBars：為了讓 SMA 等指標有緩衝，會加在 max(SMA) 後
-    /// - SafetyDays：RequiredDays 估算時的額外天數緩衝
+    ///Timeframes：各 timeframe 的客製規則（SMA 週期、MinBars、RequiredDays 等）
+    ///TradingMinutesPerDay：分K換算用的每日交易分鐘（預設 360；可設更貼近市場）
+    ///PaddingBars：為了讓 SMA 等指標有緩衝，會加在 max(SMA) 後
+    ///SafetyDays：RequiredDays 估算時的額外天數緩衝
     /// </summary>
     public sealed class WarmupPlannerOptions
     {

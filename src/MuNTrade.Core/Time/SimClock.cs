@@ -1,7 +1,6 @@
-﻿// MuNTrade.Core/Time/SimClock.cs
-using MuNTrade.Abstractions.Contracts.Time;
+﻿using MuNTrade.Abstractions.Contracts.Time;
 using System;
-using System.Threading; // ★ 引入 Interlocked
+using System.Threading; //  引入 Interlocked
 
 namespace MuNTrade.Core.Time
 {
@@ -15,7 +14,6 @@ namespace MuNTrade.Core.Time
         {
             get
             {
-                // ★ 核心修改：每次呼叫都原子性地增加一個 Tick (100奈秒)
                 // 這確保了即使在同一毫秒內被多個執行緒呼叫，每次也會得到唯一且遞增的時間
                 long currentOffset = Interlocked.Increment(ref _tickOffset);
                 var ts = _baseTimestamp.AddTicks(currentOffset);

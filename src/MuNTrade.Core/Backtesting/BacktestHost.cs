@@ -150,7 +150,7 @@ namespace MuNTrade.Core.Backtesting
             if (timeMode.Equals("SingleDay", StringComparison.OrdinalIgnoreCase))
                 end = start;
 
-            // [Phase A] Universe Planning Pass
+            // Universe Planning Pass
             var plan = await _universePlanner.BuildPlanAsync(request, start, end, ct);
             if (plan.TotalTradingDays == 0)
             {
@@ -170,7 +170,7 @@ namespace MuNTrade.Core.Backtesting
                 DayTotal = dayTotal
             }, force: true);
 
-            // [Phase B] Day Bucket Execution
+            // Day Bucket Execution
             foreach (var day in plan.DayResults.OrderBy(x => x.TradeDate))
             {
                 if (ct.IsCancellationRequested) break;
@@ -211,7 +211,7 @@ namespace MuNTrade.Core.Backtesting
                     continue;
                 }
 
-                // [Phase C] 呼叫 Warmup Cache Manager (由其內部發佈 IND_READY 等日誌)
+                // 呼叫 Warmup Cache Manager (由其內部發佈 IND_READY 等日誌)
                 // 從 DI 取得 StrategyRegistry，找出這次指定的 Strategy Template 及其預熱需求
                 using (var prepScope = _scopeFactory.CreateScope())
                 {
@@ -421,7 +421,7 @@ namespace MuNTrade.Core.Backtesting
 
                 // 訂閱該 symbol 作為 universe
 
-                // [Phase C] 拿取預熱資料塞入 IKLineStore 與 IndicatorCalculator
+                // 拿取預熱資料塞入 IKLineStore 與 IndicatorCalculator
                 var klineStore = sp.GetRequiredService<MuNTrade.Abstractions.Contracts.Data.IKLineStore>();
                 var indicatorCalc = sp.GetRequiredService<MuNTrade.Abstractions.Contracts.Indicators.IIndicatorCalculator>();
                 var registry = sp.GetRequiredService<MuNTrade.Abstractions.Contracts.Strategy.IStrategyRegistry>();
@@ -459,7 +459,7 @@ namespace MuNTrade.Core.Backtesting
                     bus.Publish(new MuNTrade.Abstractions.Events.System.Warmup.TfReadyEvent(symbol, tfStr, bars.Count));
                 }
 
-                // [Phase C.2] 發送指標初始化用的請求 (P4 TODO 17)
+                // 發送指標初始化用的請求
                 var indReq = new MuNTrade.Abstractions.Events.MarketData.IndicatorInitializeRequest(symbol, warmupBarsByTf)
                 {
                     OccurredAt = ToSafeOffset(clock.Now)
@@ -481,7 +481,7 @@ namespace MuNTrade.Core.Backtesting
                     subMgr.CurrentTickSubscriptions.Count,
                     string.Join(",", subMgr.CurrentTickSubscriptions));
 
-                // 確保預熱跟就緒事件都完成後，才讓策略實體啟動 (P1 TODO 8)
+                // 確保預熱跟就緒事件都完成後，才讓策略實體啟動
                 var templateId = new StrategyRecipeId(request.StrategyTemplateId);
                 instanceId = await strategyHost.StartInstanceAsync(templateId, request.AccountKey, ct);
                 instanceStarted = true;

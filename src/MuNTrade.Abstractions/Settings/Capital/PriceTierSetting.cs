@@ -14,7 +14,7 @@ namespace MuNTrade.Abstractions.Settings.Capital
         public decimal MaxPrice { get; set; } // 此規則適用的最高價格
         public int? Ticks { get; set; }        // (舊功能) 對應舊的 PriceMoveOverrides
         public double? Pct { get; set; }       // (舊功能) 對應舊的 PriceMoveOverrides
-        public int? MinTicks { get; set; }     // 【新增】動態門檻的下限覆蓋值
+        public int? MinTicks { get; set; }     // Lower-bound override for the dynamic threshold.
     }
 }
 

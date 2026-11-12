@@ -1,5 +1,4 @@
-﻿// MuNTrade.Abstractions/Interfaces/Indicators/IIndicatorCalculator.cs
-using MuNTrade.Abstractions.Domain.MarketData;
+﻿using MuNTrade.Abstractions.Domain.MarketData;
 using MuNTrade.Abstractions.Domain.Trading;
 using MuNTrade.Abstractions.Domain.Capital;
 using MuNTrade.Abstractions.Domain.Optimization;

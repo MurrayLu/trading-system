@@ -23,8 +23,8 @@ namespace MuNTrade.Infrastructure.DataAccess.Time
 {
     /// <summary>
     /// JSON-based TradingSession provider.
-    /// - 提供 GetSession、GetFirstAndLastTradingDateInRange、FindPreviousTradingDate、IsTradingDate、GetPeriodWindow。
-    /// - 內部會使用 IHolidayCalendar 判斷交易日（由 DI 注入）。
+    ///提供 GetSession、GetFirstAndLastTradingDateInRange、FindPreviousTradingDate、IsTradingDate、GetPeriodWindow。
+    ///內部會使用 IHolidayCalendar 判斷交易日（由 DI 注入）。
     /// </summary>
     public class JsonTradingSessionProvider : ITradingSessionProvider
     {
@@ -87,8 +87,6 @@ namespace MuNTrade.Infrastructure.DataAccess.Time
                         sessionEndCandidate = sessionEndCandidate.AddDays(-1);
                     }
 
-                    //_logger.LogDebug("[GetSession] CrossMidnight probe symbol={Sym} ts={Ts:O} startCandidate={S:O} endCandidate={E:O}", id, ts, sessionStartCandidate, sessionEndCandidate);
-
                     // 最終判定 ts 是否落在該 session 區間
                     if (ts >= sessionStartCandidate && ts <= sessionEndCandidate)
                     {
@@ -106,10 +104,7 @@ namespace MuNTrade.Infrastructure.DataAccess.Time
                         {
                             // 明確推到下一個交易日（非模稜兩可的 fallback）
                             tradeDate = _holidayCalendar.GetNextTradingDay(candidateTradeDate);
-                            //_logger.LogDebug("[GetSession] sessionEnd.Date {D} 非交易日，已推到下一交易日 {TD}", candidateTradeDate, tradeDate);
                         }
-
-                        //_logger.LogDebug("[GetSession] Matched CrossMidnight symbol={Sym} start={S:O} end={E:O} tradeDate={TD}", id, sessionStartCandidate, sessionEndCandidate, tradeDate);
 
                         return new TradingSession(sessionStartCandidate, sessionEndCandidate, tpl.Anchor, tpl.PreCloseAuctionStart, tpl.PreCloseExtension, tradeDate);
                     }
@@ -124,12 +119,10 @@ namespace MuNTrade.Infrastructure.DataAccess.Time
                         // 若當日是假日/週末，視為沒有 session（避免把假日誤判為交易日）
                         if (_holidayCalendar.IsHoliday(calDay))
                         {
-                            //_logger.LogDebug("[GetSession] DaySession on holiday ignored for {Sym} date={D}", id, calDay);
                             continue;
                         }
 
                         var tradeDate = calDay;
-                        //_logger.LogDebug("[GetSession] Matched DaySession symbol={Sym} start={S:O} end={E:O} tradeDate={TD}", id, start, end, tradeDate);
                         return new TradingSession(start, end, tpl.Anchor, tpl.PreCloseAuctionStart, tpl.PreCloseExtension, tradeDate);
                     }
                 }
@@ -201,7 +194,7 @@ namespace MuNTrade.Infrastructure.DataAccess.Time
             // 正規化為 Local 時間，避免 DateTimeKind 帶來誤差
             nowLocal = EnsureLocal(nowLocal);
 
-            // ---------- 共通第一步：先用 GetSession 取得當下的 session（用以得 referenceTradeDate） ----------
+            //共通第一步：先用 GetSession 取得當下的 session（用以得 referenceTradeDate） ----------
             // 為何要這一步：若現在為夜盤（跨日），tradeDate 會被歸屬到 sessionEnd.Date，
             // 所以必須以 provider 的 single-source-of-truth（GetSession）作為 reference。
             var currentSession = GetSession(stockId, nowLocal);
@@ -212,16 +205,16 @@ namespace MuNTrade.Infrastructure.DataAccess.Time
             // [SOP-Strict]
             bool isDeriv = _marketInfo.TryGetMarketInfo(stockId, out var info) && info.IsDerivatives;
 
-            // -------------------------
+
             // Day TF：First = Last = referenceTradeDate
-            // -------------------------
+
             if (cfg.Type == "Day")
             {
                 var tradingDate = referenceTradeDate;
 
                 // Day window start:
-                // - 期貨：從 tradingDate 的「前一交易日」15:00 開始（若找不到前一日則以 tradingDate 的 15:00 或 fallback）
-                // - 非期貨：從 tradingDate 的 09:00 開始
+                //期貨：從 tradingDate 的「前一交易日」15:00 開始（若找不到前一日則以 tradingDate 的 15:00 或 fallback）
+                //非期貨：從 tradingDate 的 09:00 開始
                 DateOnly startTradeDateForWindow = isDeriv
                     ? (FindPreviousTradingDate(stockId, tradingDate) ?? tradingDate)
                     : tradingDate;
@@ -234,9 +227,9 @@ namespace MuNTrade.Infrastructure.DataAccess.Time
                 return new PeriodWindow(windowStart, windowEnd, tradingDate, tradingDate, $"Day window (ref tradeDate={tradingDate})");
             }
 
-            // -------------------------
+
             // Week TF：以 referenceTradeDate 所在週為基準
-            // -------------------------
+
             if (cfg.Type == "Week")
             {
                 // 以 referenceTradeDate 對應的週（週一為開始）
@@ -259,8 +252,8 @@ namespace MuNTrade.Infrastructure.DataAccess.Time
                 var lastTrading = last.Value;
 
                 // WindowStart：
-                // - 期貨：以 firstTrading 的「前一交易日」15:00 為起點（若找不到前一日則以 firstTrading 本身）
-                // - 非期貨：以 firstTrading 的 09:00 為起點
+                //期貨：以 firstTrading 的「前一交易日」15:00 為起點（若找不到前一日則以 firstTrading 本身）
+                //非期貨：以 firstTrading 的 09:00 為起點
                 DateOnly startTradeDate = isDeriv
                     ? (FindPreviousTradingDate(stockId, firstTrading) ?? firstTrading)
                     : firstTrading;
@@ -271,9 +264,9 @@ namespace MuNTrade.Infrastructure.DataAccess.Time
                 return new PeriodWindow(windowStart, windowEnd, firstTrading, lastTrading, "week");
             }
 
-            // -------------------------
+
             // Month TF：以 referenceTradeDate 所在月為基準
-            // -------------------------
+
             if (cfg.Type == "Month")
             {
                 var firstOfMonth = new DateTime(referenceTradeDate.Year, referenceTradeDate.Month, 1);

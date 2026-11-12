@@ -1,10 +1,8 @@
-﻿// 檔案路徑: MuNTrade.Abstractions/Domain/Models/SignalEvent.cs
-using System;
+﻿using System;
 
 namespace MuNTrade.Abstractions.Domain.Trading
 {
     /// <summary>
-    /// 【升級後版本】
     /// 事件：策略引擎產生了一個交易訊號。
     /// 這個訊號不再是「動作」，而是策略期望達到的「目標部位狀態」。
     /// </summary>
@@ -14,7 +12,7 @@ namespace MuNTrade.Abstractions.Domain.Trading
         public DateTime SignalTime { get; set; }
 
         /// <summary>
-        /// 【新的核心】策略期望的「目標部位比例」。
+        /// 策略期望的「目標部位比例」。
         /// 1.0m  = 100% 多頭部位 (滿倉做多)
         /// -1.0m = 100% 空頭部位 (滿倉做空)
         /// 0.5m  = 50% 多頭部位 (半倉做多)

@@ -48,10 +48,10 @@ namespace MuNTrade.Core.DataProcessing
 {
     /// <summary>
     /// MarketDataPipeline（最小化版）
-    /// - 所有「週期 window」來源僅使用 ITradingSessionProvider.GetPeriodWindow(...)
-    /// - Seed 流程直接用 provider 回傳的 WindowStart/WindowEnd 做處理（open snapshot / latest / empty）
-    /// - 不再於 pipeline 內自行推算 tradingDate 或呼叫 GetSession
-    /// - 加回 Best5 節流 pump：把 QuoteBest5Event 轉成 Best5ThrottledEvent（interval 可調）
+    ///所有「週期 window」來源僅使用 ITradingSessionProvider.GetPeriodWindow(...)
+    ///Seed 流程直接用 provider 回傳的 WindowStart/WindowEnd 做處理（open snapshot / latest / empty）
+    ///不再於 pipeline 內自行推算 tradingDate 或呼叫 GetSession
+    ///加回 Best5 節流 pump：把 QuoteBest5Event 轉成 Best5ThrottledEvent（interval 可調）
     /// </summary>
     public sealed class MarketDataPipeline : IMarketDataPipeline, IDisposable
     {
@@ -109,7 +109,7 @@ namespace MuNTrade.Core.DataProcessing
             public CancellationTokenSource Cts { get; } = new();
             public Task? TickWorker { get; set; }
 
-            // ----- Best5 related -----
+            //Best5 related -----
             // 最新 snapshot（volatile 參考，寫入時替換整個 object）
             public volatile QuoteBest5Event? Best5Latest;
             // 版本號：每次 UpdateBest5 都會 +1（用 Interlocked）
@@ -117,7 +117,7 @@ namespace MuNTrade.Core.DataProcessing
             // 已經被 pump 發佈的版本（pump 發佈後會把這個設為 Best5Version）
             public int Best5PublishedVersion;
 
-            // 新增：per-symbol Best5 節流通道（容量 1，DropOldest）
+            // Per-symbol Best5 channel with capacity one and DropOldest behavior.
             public readonly Channel<QuoteBest5Event> Best5Ch =
                 Channel.CreateBounded<QuoteBest5Event>(new BoundedChannelOptions(1)
                 {
@@ -126,7 +126,7 @@ namespace MuNTrade.Core.DataProcessing
                     FullMode = BoundedChannelFullMode.DropOldest
                 });
 
-            // 新增：per-symbol Best5 worker
+            // Per-symbol Best5 worker.
             public Task? Best5Worker { get; set; }
 
             public IDisposable? MarketPathScope { get; set; }
@@ -138,14 +138,14 @@ namespace MuNTrade.Core.DataProcessing
             // 可選：哪些 indicators 要在 Best5 上運算（若無需求可移除）
             public readonly HashSet<string> IndicatorsEnabled = new(StringComparer.OrdinalIgnoreCase);
 
-            // ★ P0-3: Tick Attach 狀態追蹤
+            //  Tick Attach 狀態追蹤
             public TickAttachState AttachState { get; set; } = TickAttachState.None;
             public int ActivationVersion { get; set; } = 0;
             public string? LastTickAttachFailureReason { get; set; }
             public DateTimeOffset? LastTickAttachFailureAt { get; set; }
             public int RetryCount { get; set; } = 0;
 
-            // ★ R3: per-symbol TickCh 診斷指標
+            //  per-symbol TickCh 診斷指標
             public long TickChEnqueued;   // OnTickReceived 每次 TryWrite 前 +1
             public long TickChProcessed;  // TickWorkerLoop 每筆處理後 +1
             public long TickChHWHits;     // enqueue 時 inFlight > 75% 容量時 +1
@@ -219,7 +219,7 @@ namespace MuNTrade.Core.DataProcessing
             _log.LogInformation("[Pipeline] 券商連線狀態改變: {State} ({Msg})", state, msg);
             _brokerReady = state == ConnectionState.Connected;
 
-            // ★ 重連後的訂閱恢復現在由 SubscriptionManager 統一處理
+            //  重連後的訂閱恢復現在由 SubscriptionManager 統一處理
             // 不再需要在這裡手動補訂，避免重複訂閱
         }
 
@@ -239,7 +239,7 @@ namespace MuNTrade.Core.DataProcessing
                 _log.LogInformation("[Pipeline] Broker 未連線，指令先記錄，不立刻訂閱 ticks。");
             }
 
-            // ★ Async Subscribe call into STA with timeout protection
+            //  Async Subscribe call into STA with timeout protection
             try
             {
                 bool success = await _subMgr.SubscribeQuoteAsync(symbol, _cts.Token);
@@ -270,7 +270,7 @@ namespace MuNTrade.Core.DataProcessing
                 {
                     pipe.TicksEnabled = true;
                 }
-                // apply indicators requested by caller (optional)
+                // Apply the requested indicators when provided.
                 if (indicators is not null)
                 {
                     foreach (var id in indicators) pipe.IndicatorsEnabled.Add(id);
@@ -282,14 +282,14 @@ namespace MuNTrade.Core.DataProcessing
                     _log.LogInformation("[Pipeline] Quote checked: {Symbol}", symbol);
                 }
 
-                // publish "symbol subscribed" event so UI knows user requested this symbol
+                // Publish a subscription event so the UI can display the selected symbol.
                 _bus.Publish(new SymbolSubscribedEvent
                 {
                     Symbol = symbol,
                     OccurredAt = NowOffset()
                 });
 
-                // 如果 caller 要關掉 ticks，而先前是真，則真正去 broker 取消訂閱並發事件
+                // When tick delivery is disabled, unsubscribe if it was previously enabled.
                 if (!ticksEnabled && prevTicks)
                 {
                     _ = Task.Run(async () =>
@@ -339,7 +339,6 @@ namespace MuNTrade.Core.DataProcessing
                             }
 
 
-                            // ★★★ 改成：先修剪 Week/Month 尾筆（若屬當期 window 的快照就剔除）再初始化指標
                             var nowLocal = EnsureLocal(_clock.Now);
                             var trimmedByTf = new Dictionary<string, IReadOnlyList<JsonKLineRecord>>(StringComparer.OrdinalIgnoreCase);
 
@@ -431,7 +430,7 @@ namespace MuNTrade.Core.DataProcessing
                             });
                             _log.LogInformation("[Pipeline] {Sym} store 已準備好；已 publish SymbolReadyEvent", symbol);
 
-                            // 如果 caller 要 Ticks，就訂閱；否則不動
+                            // Subscribe when tick delivery is enabled.
                             if (wantTicks)
                             {
                                 _log.LogInformation("[Pipeline] {Sym} wantTicks=true -> SubscribeTicks", symbol);
@@ -461,7 +460,7 @@ namespace MuNTrade.Core.DataProcessing
             if (_lastDisabledAt.TryGetValue(symbol, out var lastAt) && (now - lastAt) < DisableDebounce)
             {
                 _log.LogDebug("[Pipeline] DisableSymbol 跳過（{Symbol} 防抖 {Delta}）", symbol, now - lastAt);
-                return; // ★ 防抖：短時間內避免重複 Disable → Flush 風暴
+                return; //  防抖：短時間內避免重複 Disable → Flush 風暴
             }
             _lastDisabledAt[symbol] = now;
 
@@ -493,11 +492,11 @@ namespace MuNTrade.Core.DataProcessing
 
                 // 停止背景 worker
                 try { pipe.Cts.Cancel(); } catch { /* ignore */ }
-                
+
                 SetTickAttachState(pipe, TickAttachState.Disabled, "user-disabled");
                 CompleteSymbolActivation(pipe, "disabled");
 
-                // ★ 保留一次性 Flush：確保舊 bar 不會在重連後延續
+                //  保留一次性 Flush：確保舊 bar 不會在重連後延續
                 try { _builder.FlushOpenBars(symbol); }
                 catch (Exception ex) { _log.LogWarning(ex, "[Pipeline] FlushOpenBars 例外: {Symbol}", symbol); }
 
@@ -595,9 +594,7 @@ namespace MuNTrade.Core.DataProcessing
             SetTickAttachState(pipe, TickAttachState.Attached, "attached");
             lock(pipe) { pipe.RetryCount = 0; }
 
-            // 如果訂閱管理器支援，也確保在券商層級訂閱 Best5
-            // （通常 SubscribeTicks 也會啟用券商 COM 層的 Best5）
-            // 如果您的系統有單獨的 SubscribeBest5 方法，請在此處呼叫
+            // SubscribeTicks also enables broker-level Best5 delivery.
             _bus.Publish(new TicksSubscribedEvent
             {
                 Symbol = symbol,
@@ -606,7 +603,7 @@ namespace MuNTrade.Core.DataProcessing
 
             if (pipe.TickWorker == null)
             {
-                // ★ R3: 用 wrapper 提供 crash 重啟保護
+                //  用 wrapper 提供 crash 重啟保護
                 pipe.TickWorker = Task.Run(() => RunTickWorkerWithRestartAsync(pipe, pipe.Cts.Token));
             }
 
@@ -640,7 +637,7 @@ namespace MuNTrade.Core.DataProcessing
                     }
                 }
 
-                // ★ R3: TickCh 診斷計數
+                //  TickCh 診斷計數
                 Interlocked.Increment(ref p.TickChEnqueued);
                 if (e.FeedKind == TickFeedKind.History)
                     Interlocked.Increment(ref p.TickChHistoryReceived);
@@ -660,7 +657,7 @@ namespace MuNTrade.Core.DataProcessing
         {
             if (_pipes.TryGetValue(e.Symbol, out var p) && p.TicksEnabled)
             {
-                // [修正] 確保 Bids 和 Asks 不為 null，且型別正確
+                // Validate the bid and ask collections before processing.
                 var bids = e.Bids != null
                     ? new List<PriceLevel>(e.Bids)
                     : new List<PriceLevel>(5);
@@ -714,7 +711,7 @@ namespace MuNTrade.Core.DataProcessing
         {
             if (evt == null || string.IsNullOrEmpty(evt.Symbol)) return;
 
-            // 如果是 TickOnly，則進入 P0-3 / P1-2 的重試與降級邏輯
+            // TickOnly follows the retry and degradation path.
             if (evt.FailureScope == FailureScope.TickOnly)
             {
                 _log.LogWarning("[TickAttach][Fail] symbol={Sym} kind={Kind} scope=TickOnly attempt={Att}", evt.Symbol, evt.FailureKind, evt.Attempt);
@@ -739,7 +736,7 @@ namespace MuNTrade.Core.DataProcessing
                         ScheduleTickRetry(tickPipe);
                     }
                 }
-                
+
                 // 不論重試與否，發布一條事件讓 UI 知道此檔 degraded
                 // （我們不 publish SymbolUnsubscribedEvent）
                 return; // 不繼續往下走 DisableSymbol
@@ -747,7 +744,7 @@ namespace MuNTrade.Core.DataProcessing
 
             // 否則，若是 QuoteOnly 或 Lifecycle，進入 Hard Disable 流程
             _log.LogWarning("[Pipeline][SubFail] Symbol={Sym} Reason={Reason} (Scope={Scope}) -> Hard Eviction", evt.Symbol, evt.Reason, evt.FailureScope);
-            
+
             // 完整移除
             DisableSymbol(evt.Symbol);
         }
@@ -756,7 +753,7 @@ namespace MuNTrade.Core.DataProcessing
         {
             var delayMs = 3000;
             var maxRetries = 5;
-            
+
             lock (pipe)
             {
                 if (pipe.RetryCount >= maxRetries)
@@ -765,14 +762,14 @@ namespace MuNTrade.Core.DataProcessing
                     SetTickAttachState(pipe, TickAttachState.Failed, "max-retries-reached");
                     return;
                 }
-                
+
                 pipe.RetryCount++;
             }
             SetTickAttachState(pipe, TickAttachState.RetryPending, $"retry-scheduled-{pipe.RetryCount}");
 
             _log.LogInformation("[TickAttach][RetryScheduled] symbol={Sym} delayMs={Delay} attempt={Att}", pipe.Symbol, delayMs, pipe.RetryCount);
 
-            _ = Task.Run(async () => 
+            _ = Task.Run(async () =>
             {
                 try
                 {
@@ -793,7 +790,7 @@ namespace MuNTrade.Core.DataProcessing
                 catch (OperationCanceledException) { }
             });
         }
-        
+
         private void SetTickAttachState(SymbolPipe pipe, TickAttachState newState, string? reason)
         {
             int version;
@@ -844,7 +841,7 @@ namespace MuNTrade.Core.DataProcessing
         }
 
         /// <summary>
-        /// ★ R3: TickWorkerLoop 的 crash 重啟 wrapper。
+        ///  TickWorkerLoop 的 crash 重啟 wrapper。
         /// worker crash 後最多重試 3 次，超過則停止並 log critical。
         /// </summary>
         private async Task RunTickWorkerWithRestartAsync(SymbolPipe pipe, CancellationToken ct)
@@ -892,7 +889,7 @@ namespace MuNTrade.Core.DataProcessing
             _log.LogInformation("[Worker] Tick worker started for {Symbol}", p.Symbol);
             var batch = new List<TradeTickEvent>(1024);
 
-            // ★ R3: latency 量測
+            //  latency 量測
             var sw = new System.Diagnostics.Stopwatch();
             long totalBatches = 0;
             long totalTicksProcessed = 0;
@@ -919,7 +916,7 @@ namespace MuNTrade.Core.DataProcessing
                             var ev = batch[i];
                             _builder.ProcessTick(Map(ev));
 
-                            // ★ R3: 計數
+                            //  計數
                             Interlocked.Increment(ref p.TickChProcessed);
                             if (ev.FeedKind == TickFeedKind.History)
                                 Interlocked.Increment(ref p.TickChHistoryProcessed);
@@ -937,7 +934,7 @@ namespace MuNTrade.Core.DataProcessing
                             p.Symbol, batch.Count, sw.ElapsedMilliseconds, slowBatchCount);
                     }
 
-                    // ★ R3: 定時診斷 log
+                    //  定時診斷 log
                     var nowMs = Environment.TickCount64;
                     if (nowMs - lastDiagLogMs >= DiagIntervalMs)
                     {
@@ -964,11 +961,11 @@ namespace MuNTrade.Core.DataProcessing
             catch (Exception ex)
             {
                 _log.LogError(ex, "[Worker] Tick worker crashed for {Symbol}", p.Symbol);
-                throw; // ★ R3: 讓外層 restart 機制感知到
+                throw; //  讓外層 restart 機制感知到
             }
             finally
             {
-                // ★ R3: 最終對帳 log
+                //  最終對帳 log
                 var histReceived = Interlocked.Read(ref p.TickChHistoryReceived);
                 var histProcessed = Interlocked.Read(ref p.TickChHistoryProcessed);
                 var enqueued = Interlocked.Read(ref p.TickChEnqueued);
@@ -986,7 +983,7 @@ namespace MuNTrade.Core.DataProcessing
             }
         }
 
-        // ----------------------------- Best5 per-symbol Worker（節流發佈） -----------------------------
+        //Best5 per-symbol Worker（節流發佈） -----------------------------
         private async Task Best5WorkerLoop(SymbolPipe p)
         {
             var token = p.Cts.Token;
@@ -1019,7 +1016,7 @@ namespace MuNTrade.Core.DataProcessing
                 _log.LogError(ex, "[Best5Worker] Worker crashed for {Symbol}", p.Symbol);
             }
         }
-        // -------------------------------------------------------------------------------
+
 
         private DateTimeOffset NowOffset() => new DateTimeOffset(_clock.Now);
 
@@ -1239,7 +1236,7 @@ namespace MuNTrade.Core.DataProcessing
             }
         }
 
-        // ----------------------------- Seed（每 symbol 一次） -----------------------------
+        //Seed（每 symbol 一次） -----------------------------
         private Task SeedWeekMonthAsync(string symbol, CancellationToken ct)
         {
             var nowLocal = EnsureLocal(_clock.Now);
@@ -1410,7 +1407,7 @@ namespace MuNTrade.Core.DataProcessing
             try { Task.WaitAll(tasks.ToArray(), TimeSpan.FromSeconds(2)); } catch { }
         }
 
-        // ---------- Helpers（保留必要的） ----------
+        //Helpers（保留必要的） ----------
         private static DateTime EnsureLocal(DateTime dt) =>
             dt.Kind switch
             {

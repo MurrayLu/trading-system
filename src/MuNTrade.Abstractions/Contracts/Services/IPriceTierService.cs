@@ -22,7 +22,7 @@ namespace MuNTrade.Abstractions.Contracts.Services
         decimal GetTickSizeAtPrice(decimal price);
 
         /// <summary>
-        /// [兼容舊版] 等同於 GetTickSizeAtPrice。
+        /// Compatibility alias for GetTickSizeAtPrice.
         /// </summary>
         decimal GetTickPrice(decimal price);
 

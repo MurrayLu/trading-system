@@ -82,7 +82,7 @@ namespace MuNTrade.Core.OrderBook
             {
                 if (seq.Contains("Escalated") && seq.Contains("Defended") && seq.Contains("Confirmed"))
                 {
-                    // Simple check: Last is Breached. 
+                    // Simple check: Last is Breached.
                     // Check if Escalated occurred before.
                     if (ShouldThrottle(symbol, isBid, price, "IcebergBlowoff", time)) return;
                     _bus.Publish(new IcebergStoryEvent(symbol, price, isBid, time, "IcebergBlowoff", "Pressure Cooker Explosion", 1.0)

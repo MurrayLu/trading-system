@@ -80,7 +80,6 @@ namespace MuNTrade.Core.Capital
             return await CalcStockSize(symbol, price);
         }
 
-        // ★★★ 核心運算：證券成長系統 ★★★
         // 回傳: 股數 (Shares)
         private async Task<int> CalcStockSize(string symbol, decimal entryPrice)
         {
@@ -283,7 +282,7 @@ namespace MuNTrade.Core.Capital
             return allPhases[currentIndex];
         }
 
-        // [New] Hysteresis Logic with Persistence
+        // Hysteresis Logic with Persistence
         private async Task<PhaseRule?> ResolvePhaseWithGatesAsync(
             System.Collections.Generic.List<PhaseRule> allPhases,
             decimal currentEquity,
@@ -294,13 +293,7 @@ namespace MuNTrade.Core.Capital
 
             int currentIndex = account.CurrentPhaseIndex;
 
-            // Initial State: Find based on Min/Max (Cold Start if value is default 0 but likely valid, or invalid -1 if we supported it)
-            // But 0 is "Phase 0", which is valid. 
-            // Better logic: if this is first run ever? Maybe check checking consistency?
-            // Hysteresis relies on trusted previous state. 
-            // If the persisted state is wildly out of sync (e.g. manual edit), we might want to correct it.
-            // But trusting it is safer for "Sticking" behavior. 
-            // Exception: If current index is out of bounds of current rules (e.g. rules changed size), reset.
+            // Preserve a valid persisted phase index; recalculate when it falls outside the configured range.
             if (currentIndex < 0 || currentIndex >= allPhases.Count)
             {
                 var initial = allPhases.FirstOrDefault(p => currentEquity >= p.MinEquity && currentEquity < p.MaxEquity);

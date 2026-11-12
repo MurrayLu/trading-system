@@ -78,7 +78,7 @@ namespace MuNTrade.Core.Services.Dashboard
         {
             var positions = _posSnapshot.GetAll();
 
-            // === 估算數值（你原本就有） ===
+            // === 估算數值（既有就有） ===
             var unreal = positions.Sum(p => p.UnrealizedPnL);
             var realized = 0m;
             var costBasis = positions.Sum(p => p.AverageCost * p.Quantity);
@@ -169,9 +169,9 @@ namespace MuNTrade.Core.Services.Dashboard
             };
         }
 
-        // ======= 新增的小工具方法們（無外部依賴，安全） =======
+        // Helper methods.
 
-        // 行情來源：你目前是實盤來源，先固定 LIVE（之後要讀設定再改這裡即可）
+        // 行情來源：目前是實盤來源，先固定 LIVE（之後要讀設定再改這裡即可）
         private static string DetermineFeedMode() => "LIVE";
 
         // 時鐘來源：型別名包含 "Broker" 視為 BROKER，否則 SIM

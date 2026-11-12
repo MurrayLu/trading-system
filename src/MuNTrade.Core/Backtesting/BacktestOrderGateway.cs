@@ -196,10 +196,10 @@ namespace MuNTrade.Core.Backtesting
         {
             // Market orders in backtest should not be constrained by signal price.
             // Fill price is handled by ApplyFillModel(lastPrice, ...).
-            if (request?.OrderType == OrderType.Market)
+            if (request.OrderType == OrderType.Market)
                 return 0m;
 
-            var limit = request?.OriginalSignal?.Price ?? 0m;
+            var limit = request.OriginalSignal?.Price ?? 0m;
             if (limit <= 0 || exec.LimitOffsetTicks == 0) return limit;
             return request.Side == OrderSide.Buy
                 ? limit + exec.LimitOffsetTicks

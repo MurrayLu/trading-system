@@ -23,7 +23,7 @@ using System.Linq;
 
 namespace MuNTrade.Core.Trading.Adapters
 {
-    // [Patch 4] Modified to handle BrokerPositionQueryCompletedEvent and force final flush
+    // Modified to handle BrokerPositionQueryCompletedEvent and force final flush
     public sealed class BrokerPositionSnapshotAdapter : IDisposable
     {
         private readonly IEventBus _bus;

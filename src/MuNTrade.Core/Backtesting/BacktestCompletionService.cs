@@ -1,4 +1,3 @@
-﻿// MuNTrade.Core/Backtesting/BacktestCompletionService.cs (v7.7.3 - 最終修正版)
 
 using MuNTrade.Abstractions.Domain.MarketData;
 using MuNTrade.Abstractions.Domain.Trading;
@@ -18,15 +17,13 @@ namespace MuNTrade.Core.Backtesting
             _tradeLogger = tradeLogger;
         }
 
-        // ★ 新增：一個公開的方法，用於接收成交紀錄 ★
-        // BacktestEngine 將會呼叫這個方法
+        // Records a fill received from the backtest engine.
         public void RecordFill(OrderFillEvent fill)
         {
-            // 將收到的 fill 事件，直接轉交給 TradeLoggerService 進行記錄
             _tradeLogger.RecordFill(fill);
         }
 
-        // 這個方法維持不變，它仍然是最終計算績效的入口
+        // Calculates performance from the recorded trades.
         public BacktestPerformance CalculatePerformance()
         {
             return _tradeLogger.CalculatePerformance();

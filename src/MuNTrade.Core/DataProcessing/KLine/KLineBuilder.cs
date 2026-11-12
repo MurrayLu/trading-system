@@ -23,9 +23,9 @@ namespace MuNTrade.Core.DataProcessing.KLine
 {
     /// <summary>
     /// 穩健版 KLineBuilder（依賴 ITradingSessionProvider 作為唯一 session/period 真相）
-    /// - Day/Week/Month 的 boundary 全部由 provider.GetPeriodWindow 決定
-    /// - Time TF 仍在 builder 做 AlignUp，但 Anchor 來源優先用 provider.GetSession 的 Anchor（若有）
-    /// - 對於時間 Kind 統一使用 Local（與 log +08:00 相符）
+    ///Day/Week/Month 的 boundary 全部由 provider.GetPeriodWindow 決定
+    ///Time TF 仍在 builder 做 AlignUp，但 Anchor 來源優先用 provider.GetSession 的 Anchor（若有）
+    ///對於時間 Kind 統一使用 Local（與 log +08:00 相符）
     /// </summary>
     public sealed class KLineBuilder : IKLineBuilder
     {
@@ -57,7 +57,7 @@ namespace MuNTrade.Core.DataProcessing.KLine
             _clock = clock;
         }
 
-        // ---------------------- 公用工具 ----------------------
+        //公用工具 ----------------------
         private static TimeSpan TruncateToSecond(TimeSpan t)
             => new TimeSpan(t.Days, t.Hours, t.Minutes, t.Seconds);
 
@@ -99,11 +99,11 @@ namespace MuNTrade.Core.DataProcessing.KLine
             return TruncateToMinute(DateTime.SpecifyKind(result, DateTimeKind.Local));
         }
 
-        // ---------------------- Compute Expected Boundary ----------------------
+        //Compute Expected Boundary ----------------------
         /// <summary>
         /// 計算「應該正在進行的那根」的 start/end。
-        /// - Time: 使用 AlignUp（anchor 來源優先從 session）
-        /// - Day/Week/Month: 從 provider.GetPeriodWindow 取 WindowStart/WindowEnd（唯一真相）
+        ///Time: 使用 AlignUp（anchor 來源優先從 session）
+        ///Day/Week/Month: 從 provider.GetPeriodWindow 取 WindowStart/WindowEnd（唯一真相）
         /// </summary>
         private (DateTime start, DateTime end) ComputeExpectedBoundary(
             string symbol,
@@ -163,7 +163,7 @@ namespace MuNTrade.Core.DataProcessing.KLine
             return (TruncateToMinute(startWin), TruncateToMinute(endWin));
         }
 
-        // ---------------------- IKLineBuilder：註冊/反註冊 ----------------------
+        //IKLineBuilder：註冊/反註冊 ----------------------
         public void RegisterConfiguration(BarConfig config)
         {
             string key = $"{config.Type}_{config.Period}";
@@ -176,7 +176,7 @@ namespace MuNTrade.Core.DataProcessing.KLine
             _builderStates.TryRemove(key, out _);
         }
 
-        // ---------------------- Tick 主流程 ----------------------
+        //Tick 主流程 ----------------------
         public void ProcessTick(TickData tick)
         {
             if (tick == null) return;
@@ -251,7 +251,7 @@ namespace MuNTrade.Core.DataProcessing.KLine
                 return;
             }
 
-            // ---------------- Pre-close（僅 1 分）區間處理 ----------------
+            //Pre-close（僅 1 分）區間處理 ----------------
             bool isOneMinute = state.Config.Type == "Time" && state.Config.Period == 1;
             if (isOneMinute)
             {
@@ -269,7 +269,7 @@ namespace MuNTrade.Core.DataProcessing.KLine
                     }
                 }
             }
-            // ----------------------------------------------------------------
+
 
             // 如果超過或等於 end，關棒並建下一根
             // 注意：cur.EndTime 是 ExchangeTs，ts 是 DateTime，比較時取 Value
@@ -292,7 +292,7 @@ namespace MuNTrade.Core.DataProcessing.KLine
             }
         }
 
-        // ---------------------- 建棒與邊界計算 ----------------------
+        //建棒與邊界計算 ----------------------
         private DynamicBar CreateNewBar(TickData tick, BarConfig cfg, TradingSession sess)
         {
             var ts = AsLocal(tick.ExchangeTs.Value);
@@ -310,7 +310,7 @@ namespace MuNTrade.Core.DataProcessing.KLine
             );
         }
 
-        // ---------------------- Flush API ----------------------
+        //Flush API ----------------------
         public void FlushOpenBars()
         {
             _logger?.LogWarning("[FlushAll] ByApi AllSymbols");
@@ -389,7 +389,7 @@ namespace MuNTrade.Core.DataProcessing.KLine
             }
         }
 
-        // ---------------------- Seed API ----------------------
+        //Seed API ----------------------
         /// <summary>
         /// 種子注入（使用 provider 作為 Day/Week/Month 的唯一 window 決策）
         /// </summary>
@@ -466,7 +466,7 @@ namespace MuNTrade.Core.DataProcessing.KLine
             );
         }
 
-        // ---------------------- 小工具 ----------------------
+        //小工具 ----------------------
         // 當 provider 不可用且需要 fallback 時，嘗試從 provider 取得前一交易日（回傳 DateOnly?）
         // 這只是輔助用，平常應由 provider 的 GetPeriodWindow/FindPreviousTradingDate 提供
         private DateOnly? FindPreviousTradingDateLocal(string symbol, DateOnly day, int maxLookbackDays = 30)

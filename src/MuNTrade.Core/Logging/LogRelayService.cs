@@ -28,7 +28,7 @@ namespace MuNTrade.Core.Logging
         private IDisposable? _subscription;
 
         /// <summary>
-        /// 修改建構子，直接注入 InMemorySink。
+        /// Writes log entries to the in-memory sink.
         /// </summary>
         public LogRelayService(IEventBus bus, InMemorySink sink, IClock clock)
         {

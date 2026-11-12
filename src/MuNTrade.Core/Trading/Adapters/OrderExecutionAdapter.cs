@@ -56,22 +56,20 @@ namespace MuNTrade.Core.Trading.Adapters
 
             try
             {
-                // --- 步驟 1: 建立新的 SignalEvent ---
+                //步驟 1: 建立新的 SignalEvent ---
                 // 這是最關鍵的轉換。我們的 OrderIntent 是「指令式」的(買/賣 N 股)，
-                // 但新的 SignalEvent 是「宣告式」的(目標倉位比例)。
-                // 我們需要做一個合理的推斷。
+                // Entry intents target a full position.
                 var compatibleSignal = new SignalEvent
                 {
                     StockId = intent.Symbol,
                     SignalTime = intent.CreatedAt.Value,
                     Price = intent.Plan.LimitPrice.GetValueOrDefault(0),
                     Reason = intent.CorrelationId,
-                    Tag = "Slice1_Entry", // 給予一個標籤
-                                          // ★ 核心推斷：既然是進場指令，我們假設目標是滿倉
+                    Tag = "Entry",
                     TargetPositionRatio = (intent.Side == OrderSide.Buy) ? 1.0m : -1.0m
                 };
 
-                // --- 步驟 2: 建立新的 OrderRequest ---
+                // Create the order request.
                 var oldRequest = new OrderRequest
                 {
                     OriginalSignal = compatibleSignal, // 賦值給 required 成員
@@ -100,12 +98,12 @@ namespace MuNTrade.Core.Trading.Adapters
                 _logger.LogInformation("Adapter is submitting a translated order for {Symbol} with SL={SL} and TP={TP}.",
                     intent.Symbol, oldRequest.StopLossPrice, oldRequest.TakeProfitPrice);
 
-                // --- 步驟 3: 呼叫舊的下單服務 ---
+                //步驟 3: 呼叫舊的下單服務 ---
                 _oldExecutionService.ExecuteOrder(oldRequest);
 
-                // --- 步驟 4: 返回初步結果 (此處邏輯不變) ---
+                //步驟 4: 返回初步結果 (此處邏輯不變) ---
                 var result = new OrderResult(
-                    OrderId: intent.CorrelationId,
+                    OrderId: intent.CorrelationId ?? string.Empty,
                     Accepted: true,
                     FullyFilled: false,
                     FilledQuantity: 0,
@@ -125,7 +123,7 @@ namespace MuNTrade.Core.Trading.Adapters
         public Task CancelAsync(string orderId, CancellationToken ct = default)
         {
             _logger.LogInformation("CancelAsync called for OrderId: {OrderId}. Not yet implemented.", orderId);
-            // TODO: 實作取消訂單的邏輯，可能需要呼叫一個舊的取消服務
+            // This adapter logs cancellation requests but does not call a gateway cancellation method.
             return Task.CompletedTask;
         }
     }

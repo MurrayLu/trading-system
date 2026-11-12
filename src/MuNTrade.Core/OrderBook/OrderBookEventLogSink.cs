@@ -13,7 +13,7 @@ using MuNTrade.Abstractions.Events.Strategy;
 using MuNTrade.Abstractions.Time;
 using MuNTrade.Abstractions.Contracts.Hubs;
 
-namespace MuNTrade.Core.Trading.Slice1
+namespace MuNTrade.Core.OrderBook
 {
     /// <summary>
     /// 將 OrderBook 相關事件寫入 ring buffer，並定期輸出統計摘要。

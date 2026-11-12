@@ -1,5 +1,4 @@
-﻿// 建議路徑: MuNTrade.Abstractions/Interfaces/Hubs/IEventBus.cs
-using System;
+﻿using System;
 
 namespace MuNTrade.Abstractions.Contracts.Hubs
 {
