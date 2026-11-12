@@ -65,6 +65,66 @@ public sealed class DemoWorkflowTests
         }
     }
 
+    [Fact]
+    public async Task Cli_ReportIsSelfContainedAndDeterministic()
+    {
+        var output = CreateTempDirectory();
+        var site = Path.Combine(Path.GetDirectoryName(output)!, Path.GetFileName(output) + "-site");
+        try
+        {
+            var backtest = await RunCliAsync(
+                "backtest", "--symbol", "9901", "--from", "2024-03-11", "--to", "2024-03-11", "--out", output);
+            Assert.True(backtest.ExitCode == 0, $"CLI exit code: {backtest.ExitCode}\n{backtest.StandardOutput}\n{backtest.StandardError}");
+
+            var first = await RunCliAsync("report", "--in", output, "--site", site);
+            Assert.True(first.ExitCode == 0, $"Report exit code: {first.ExitCode}\n{first.StandardOutput}\n{first.StandardError}");
+            var page = Path.Combine(site, "index.html");
+            Assert.True(File.Exists(page));
+            var firstHash = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(page)));
+            var html = await File.ReadAllTextAsync(page);
+            Assert.Contains("總覽 Overview", html);
+            Assert.Contains("累計淨損益曲線 Cumulative Net P&amp;L", html);
+            Assert.Contains("商品 × 交易日淨損益 Product × Day Net P&amp;L", html);
+            Assert.Contains("商品摘要 Product Summary", html);
+            Assert.Contains("完成交易明細 Completed Trades", html);
+            Assert.DoesNotContain("委託 Orders", html);
+            Assert.DoesNotContain("http://", html, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("https://", html, StringComparison.OrdinalIgnoreCase);
+
+            var second = await RunCliAsync("report", "--in", output, "--site", site);
+            Assert.True(second.ExitCode == 0, $"Second report exit code: {second.ExitCode}\n{second.StandardOutput}\n{second.StandardError}");
+            var secondHash = Convert.ToHexString(SHA256.HashData(await File.ReadAllBytesAsync(page)));
+            Assert.Equal(firstHash, secondHash);
+        }
+        finally
+        {
+            if (Directory.Exists(output)) Directory.Delete(output, recursive: true);
+            if (Directory.Exists(site)) Directory.Delete(site, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task Cli_ReportExitsNonZeroWhenInputDirectoryDoesNotExist()
+    {
+        var root = CreateTempDirectory();
+        try
+        {
+            var missing = Path.Combine(root, "missing");
+            var site = Path.Combine(root, "site");
+            var run = await RunCliAsync("report", "--in", missing, "--site", site);
+            Assert.NotEqual(0, run.ExitCode);
+            Assert.Contains("不存在", run.StandardError + run.StandardOutput);
+
+            var invalid = await RunCliAsync("report", "--in", root, "--site", site);
+            Assert.NotEqual(0, invalid.ExitCode);
+            Assert.Contains("不是有效的 MuNTrade.Demo.Cli 回測輸出目錄", invalid.StandardError + invalid.StandardOutput);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
     private static async Task<CliRun> RunCliAsync(params string[] arguments)
     {
         var root = FindRepositoryRoot();

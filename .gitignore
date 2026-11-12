@@ -15,4 +15,5 @@ artifacts/
 appsettings.local.json
 docs/tasks/
 /out/
+/site/
 /Config/
