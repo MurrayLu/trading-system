@@ -17,7 +17,15 @@ public sealed class DemoWorkflowTests
             SampleDataGenerator.Generate(first);
             SampleDataGenerator.Generate(second);
 
-            Assert.Equal(HashFiles(first).ToArray(), HashFiles(second).ToArray());
+            var firstHashes = HashFilesByContent(first);
+            var secondHashes = HashFilesByContent(second);
+            var committedHashes = HashFilesByContent(Path.Combine(FindRepositoryRoot(), "samples"), validateTextFormat: false);
+            Assert.Equal(firstHashes.ToArray(), secondHashes.ToArray());
+            foreach (var (relativePath, hash) in firstHashes)
+            {
+                Assert.True(committedHashes.TryGetValue(relativePath, out var committedHash), $"Committed sample is missing: {relativePath}");
+                Assert.Equal(hash, committedHash);
+            }
             AssertSampleTickQuality(first);
         }
         finally
@@ -82,6 +90,7 @@ public sealed class DemoWorkflowTests
             Assert.True(File.Exists(page));
             var firstHash = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(page)));
             var html = await File.ReadAllTextAsync(page);
+            Assert.DoesNotContain("\r", html);
             Assert.Contains("總覽 Overview", html);
             Assert.Contains("累計淨損益曲線 Cumulative Net P&amp;L", html);
             Assert.Contains("商品 × 交易日淨損益 Product × Day Net P&amp;L", html);
@@ -166,13 +175,32 @@ public sealed class DemoWorkflowTests
         return count;
     }
 
-    private static SortedDictionary<string, string> HashFiles(string directory)
+    private static SortedDictionary<string, string> HashFilesByContent(string directory, bool validateTextFormat = true)
     {
         var hashes = new SortedDictionary<string, string>(StringComparer.Ordinal);
         foreach (var path in Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories))
         {
             var relative = Path.GetRelativePath(directory, path).Replace(Path.DirectorySeparatorChar, '/');
-            hashes[relative] = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)));
+            byte[] content;
+            if (path.EndsWith(".gz", StringComparison.OrdinalIgnoreCase))
+            {
+                using var compressed = File.OpenRead(path);
+                using var gzip = new GZipStream(compressed, CompressionMode.Decompress);
+                using var expanded = new MemoryStream();
+                gzip.CopyTo(expanded);
+                content = expanded.ToArray();
+            }
+            else
+            {
+                content = File.ReadAllBytes(path);
+                if (validateTextFormat && (Path.GetExtension(path) is ".json" or ".txt"))
+                    Assert.DoesNotContain((byte)'\r', content);
+            }
+            if (validateTextFormat && content.Length >= 3)
+                Assert.False(content[0] == 0xEF && content[1] == 0xBB && content[2] == 0xBF, $"Unexpected UTF-8 BOM in {relative}.");
+            if (validateTextFormat && path.EndsWith(".gz", StringComparison.OrdinalIgnoreCase))
+                Assert.DoesNotContain((byte)'\r', content);
+            hashes[relative] = Convert.ToHexString(SHA256.HashData(content));
         }
         return hashes;
     }

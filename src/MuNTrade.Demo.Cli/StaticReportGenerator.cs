@@ -13,7 +13,8 @@ internal static class StaticReportGenerator
         var snapshot = ReadSnapshot(inputRoot);
         Directory.CreateDirectory(siteRoot);
         var pagePath = Path.Combine(siteRoot, "index.html");
-        File.WriteAllText(pagePath, Render(snapshot), new UTF8Encoding(false));
+        var html = Render(snapshot).Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n');
+        File.WriteAllText(pagePath, html, new UTF8Encoding(false));
         return pagePath;
     }
 

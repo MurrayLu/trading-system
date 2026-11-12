@@ -42,10 +42,8 @@ jobs:
         with:
           dotnet-version: 8.0.x
       - run: dotnet restore MuNTrade.sln
-      - name: Regenerate samples and confirm they are committed
-        run: |
-          dotnet run --project tools/MuNTrade.SampleData -c Release --no-restore
-          git diff --exit-code -- samples
+      - name: Verify generated sample content
+        run: bash scripts/verify-samples.sh
       - name: Run backtest twice and compare summary hashes
         shell: bash
         run: |

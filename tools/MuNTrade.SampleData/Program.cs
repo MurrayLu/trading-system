@@ -29,9 +29,9 @@ public static class SampleDataGenerator
 
             var tickCount = Symbols.Length * TradeDates.Length * TicksPerDay;
             var totalBytes = Directory.EnumerateFiles(output, "*", SearchOption.AllDirectories).Sum(path => new FileInfo(path).Length);
-            Console.WriteLine($"Generated deterministic synthetic data: {Symbols.Length} symbols × {TradeDates.Length} trading days × {TicksPerDay:N0} ticks/day = {tickCount:N0} ticks.");
-            Console.WriteLine($"Warmup: {WarmupBars} one-minute bars per symbol on {WarmupDate:yyyy-MM-dd}; daily K lines included for each tick date.");
-            Console.WriteLine($"Output: {output} ({totalBytes:N0} bytes)");
+            Console.WriteLine(FormattableString.Invariant($"Generated deterministic synthetic data: {Symbols.Length} symbols × {TradeDates.Length} trading days × {TicksPerDay:N0} ticks/day = {tickCount:N0} ticks."));
+            Console.WriteLine(FormattableString.Invariant($"Warmup: {WarmupBars} one-minute bars per symbol on {WarmupDate:yyyy-MM-dd}; daily K lines included for each tick date."));
+            Console.WriteLine(FormattableString.Invariant($"Output: {output} ({totalBytes:N0} bytes)"));
             return 0;
         }
         catch (ArgumentException ex)
@@ -84,10 +84,11 @@ public static class SampleDataGenerator
 
     private static void WriteTicks(string directory, string klineDirectory, string symbol, int symbolIndex, int dayIndex, DateOnly date)
     {
-        var path = Path.Combine(directory, $"{date:yyyyMMdd}_D_{symbol}.csv.gz");
+        var path = Path.Combine(directory, $"{date.ToString("yyyyMMdd", CultureInfo.InvariantCulture)}_D_{symbol}.csv.gz");
         using var file = File.Create(path);
         using var gzip = new GZipStream(file, CompressionLevel.Optimal);
         using var writer = new StreamWriter(gzip, new UTF8Encoding(false));
+        writer.NewLine = "\n";
         writer.WriteLine("Timestamp,Symbol,Market,Price,Volume");
 
         var random = new DeterministicRandom(MakeSeed(symbolIndex, dayIndex));
@@ -165,8 +166,10 @@ public static class SampleDataGenerator
 
     private static void WriteKLineFile(string directory, DateOnly date, IReadOnlyList<KLineRecord> records)
     {
-        var path = Path.Combine(directory, $"1 分 K 線_{date:yyyyMMdd}_{date:yyyyMMdd}.json");
+        var dateText = date.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+        var path = Path.Combine(directory, $"1 分 K 線_{dateText}_{dateText}.json");
         var json = System.Text.Json.JsonSerializer.Serialize(records, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        json = json.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n');
         File.WriteAllText(path, json, new UTF8Encoding(false));
     }
 
