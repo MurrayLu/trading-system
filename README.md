@@ -82,7 +82,7 @@ flowchart LR
 
 ## 工程重點 (Engineering highlights)
 
-**一套核心，三種執行模式。** 券商、行情來源、時鐘與委託閘道都在 [MuNTrade.Abstractions](src/MuNTrade.Abstractions/) 以介面定義，核心不認識任何具體實作。[CoreServicesRegistration](src/MuNTrade.Core/Extensions/CoreServicesRegistration.cs) 依 `AppMode` 組出不同的服務圖：回測用 `SimClock` 與 [BacktestOrderGateway](src/MuNTrade.Core/Backtesting/BacktestOrderGateway.cs)，Paper 用 [PaperTradingGateway](src/MuNTrade.Core/Trading/Gateways/PaperTradingGateway.cs)，其餘管線相同。公開版 CLI 的組裝本身（[DemoCli.cs](src/MuNTrade.Demo.Cli/DemoCli.cs)）不到兩百行，就是因為這個切法。
+**一套核心，三種執行模式。** 券商、行情來源、時鐘與委託閘道都在 [MuNTrade.Abstractions](src/MuNTrade.Abstractions/) 以介面定義，核心不依賴券商 SDK，也不認識任何具體實作。[CoreServicesRegistration](src/MuNTrade.Core/Extensions/CoreServicesRegistration.cs) 依 `AppMode` 組出不同的服務圖：回測用 `SimClock` 與 [BacktestOrderGateway](src/MuNTrade.Core/Backtesting/BacktestOrderGateway.cs)，Paper 用 [PaperTradingGateway](src/MuNTrade.Core/Trading/Gateways/PaperTradingGateway.cs)，其餘管線相同。公開版 CLI 的組裝本身（[DemoCli.cs](src/MuNTrade.Demo.Cli/DemoCli.cs)）不到兩百行，就是因為這個切法。
 
 **策略是插件。** 策略實作 [IStrategy](src/MuNTrade.Abstractions/Contracts/Strategy/IStrategy.cs)，由範本建立實例；透過 [IStrategyIngressSpec](src/MuNTrade.Abstractions/Contracts/Strategy/IStrategyIngressSpec.cs) 宣告自己需要哪些商品、週期與指標，由 [StrategyRuntime](src/MuNTrade.Core/StrategyRuntime/) 負責訂閱、路由與生命週期。策略只送出意圖，風控與下單由框架處理。repo 內附六個驗證用策略範本，可用 `list-strategies` 查看。
 
@@ -90,7 +90,7 @@ flowchart LR
 
 **可回放的回測。** [BacktestHost](src/MuNTrade.Core/Backtesting/BacktestHost.cs) 逐日逐商品建立獨立的執行範圍，[FileTickPlayer](src/MuNTrade.Infrastructure/DataAccess/FileSystem/FileTickPlayer.cs) 依序供應 tick，時鐘跟著行情時間前進。回測支援單日虧損、連續虧損、每日交易次數與進場時間窗等風控設定，並計入手續費與交易稅。每次執行都留下事件日誌，報表由日誌產生。
 
-**可重現是被測試的性質。** 樣本資料由 [固定 seed 的產生器](tools/MuNTrade.SampleData/Program.cs) 產生；CI 會重新產生一次並與 repo 內的樣本逐檔比對內容，再連跑兩次回測比對摘要雜湊。報表產生器對相同輸入輸出逐位元相同的 HTML。
+**可重現是被測試的性質。** 樣本資料由 [固定 seed 的產生器](tools/MuNTrade.SampleData/Program.cs) 產生；CI 會重新產生一次並與 repo 內的樣本逐檔比對內容，再連跑兩次回測與報表，比對摘要檔與報表 HTML 的雜湊。
 
 ## 程式碼導覽 (Code map)
 
@@ -140,6 +140,9 @@ dotnet test MuNTrade.sln -c Release
 ## 已知限制 (Known limitations)
 
 - **事件路由的順序。** [MarketEventRouter](src/MuNTrade.Core/StrategyRuntime/Routing/MarketEventRouter.cs) 以非同步方式派送事件，策略診斷事件的順序在不同次執行間可能不同。樣本資料上的成交、完成交易與損益可重現，但這是回測決定性的弱點；改進方向是每個商品一條有序佇列，並在推進時鐘前明確等待排空。
+- **日誌時間戳的次毫秒位數不穩定。** [SimClock](src/MuNTrade.Core/Time/SimClock.cs) 每次被讀取會加 100 奈秒以保證時間唯一遞增，而一筆 tick 內被讀取幾次取決於上一項的非同步派送，所以事件日誌的時間在毫秒以下可能每次不同。報表只使用到毫秒，因此不受影響。
+- **demo 沒有觸發風控拒單。** 範例設定把單日虧損、連續虧損與每日交易次數的門檻都設為 0（停用），所以報表中每一筆意圖都通過。另外，[RiskManagerService](src/MuNTrade.Core/Trading/RiskManagerService.cs) 中以意圖為輸入的評估路徑只檢查帳戶與市場別，不套用資金上限；demo 回測不經過這條路徑。
+- **券商介面還帶著單一券商的形狀。** [Contracts/Brokers](src/MuNTrade.Abstractions/Contracts/Brokers/) 的介面是從一家券商的 API 抽出來的，名稱與部分成員仍反映該券商的用語；要接第二家券商，這一層需要再抽象一次。
 - **回測日誌不含委託事件。** 目前記錄策略封包、成交、完成交易與策略狀態。
 - **撮合模型簡化。** 以 tick 價格整筆成交，不模擬交易所佇列位置、延遲與部分成交。
 - **公開版不能下單。** 沒有券商連線。

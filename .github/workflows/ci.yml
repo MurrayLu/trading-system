@@ -44,16 +44,18 @@ jobs:
       - run: dotnet restore MuNTrade.sln
       - name: Verify generated sample content
         run: bash scripts/verify-samples.sh
-      - name: Run backtest twice and compare summary hashes
+      - name: Run backtest and report twice and compare hashes
         shell: bash
         run: |
-          dotnet run --project src/MuNTrade.Demo.Cli -c Release -- backtest
-          first_hash="$(sha256sum out/backtest_summary.csv | cut -d ' ' -f 1)"
-          dotnet run --project src/MuNTrade.Demo.Cli -c Release -- backtest
-          second_hash="$(sha256sum out/backtest_summary.csv | cut -d ' ' -f 1)"
-          test "$first_hash" = "$second_hash"
-      - name: Generate the static report
-        run: dotnet run --project src/MuNTrade.Demo.Cli -c Release -- report
+          run_once() {
+            dotnet run --project src/MuNTrade.Demo.Cli -c Release -- backtest
+            dotnet run --project src/MuNTrade.Demo.Cli -c Release -- report
+            sha256sum out/backtest_summary.csv site/index.html | cut -d ' ' -f 1
+          }
+          first_hashes="$(run_once | tail -n 2)"
+          second_hashes="$(run_once | tail -n 2)"
+          echo "$first_hashes"
+          test "$first_hashes" = "$second_hashes"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site/

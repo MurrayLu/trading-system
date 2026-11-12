@@ -72,8 +72,8 @@ internal static class StaticReportGenerator
                 {
                     var symbol = ReadString(GetProperty(evt, "StockId")) ?? fileSymbol;
                     if (!fillsBySymbol.ContainsKey(symbol)) fillsBySymbol[symbol] = 0;
-                    var entryTime = GetDateTime(evt, "EntryTime");
-                    var exitTime = GetDateTime(evt, "ExitTime");
+                    var entryTime = TruncateToMilliseconds(GetDateTime(evt, "EntryTime"));
+                    var exitTime = TruncateToMilliseconds(GetDateTime(evt, "ExitTime"));
                     trades.Add(new TradeRecord(
                         symbol,
                         entryTime,
@@ -93,7 +93,9 @@ internal static class StaticReportGenerator
         symbols = symbols.Union(fillsBySymbol.Keys, StringComparer.OrdinalIgnoreCase)
             .OrderBy(x => x, StringComparer.Ordinal).ToArray();
         var sortedTrades = trades.OrderBy(x => x.ExitTime).ThenBy(x => x.Symbol, StringComparer.Ordinal)
-            .ThenBy(x => x.EntryTime).ThenBy(x => x.Source, StringComparer.Ordinal).ToArray();
+            .ThenBy(x => x.EntryTime).ThenBy(x => x.Source, StringComparer.Ordinal)
+            .ThenBy(x => x.Direction, StringComparer.Ordinal).ThenBy(x => x.EntryPrice).ThenBy(x => x.ExitPrice)
+            .ThenBy(x => x.Quantity).ThenBy(x => x.GrossPnL).ThenBy(x => x.Costs).ThenBy(x => x.NetPnL).ToArray();
         var start = summaryDates.Count == 0 ? metadata.StartDate : summaryDates.Min();
         var end = summaryDates.Count == 0 ? metadata.EndDate : summaryDates.Max();
         return new ReportSnapshot(
@@ -335,6 +337,13 @@ internal static class StaticReportGenerator
         var value = GetProperty(element, name);
         if (value.ValueKind == JsonValueKind.String && DateTime.TryParse(value.GetString(), Invariant, DateTimeStyles.RoundtripKind, out var date)) return date;
         return DateTime.MinValue;
+    }
+
+    private static DateTime TruncateToMilliseconds(DateTime value)
+    {
+        // SimClock adds unique sub-millisecond ticks that are not part of the sample data precision.
+        var ticks = value.Ticks - value.Ticks % TimeSpan.TicksPerMillisecond;
+        return new DateTime(ticks, value.Kind);
     }
     private static string ReadDirection(JsonElement value)
         => value.ValueKind == JsonValueKind.Number && value.TryGetInt32(out var number)
