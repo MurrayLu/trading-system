@@ -1,0 +1,10 @@
+{
+  "name": "MuNTrade .NET 8",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:8.0",
+  "postCreateCommand": "dotnet restore MuNTrade.sln",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-dotnettools.csharp"]
+    }
+  }
+}

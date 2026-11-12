@@ -1,0 +1,6 @@
+**/bin/
+**/obj/
+out/
+site/
+.git/
+docs/tasks/

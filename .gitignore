@@ -3,7 +3,17 @@
 node_modules/
 dist/
 artifacts/
+**/artifacts/
+.tmp/
+*.user
+.vs/
 .dev.vars*
 .env*
 *.sqlite*
 *.db
+*.credentials*.json
+appsettings.local.json
+docs/tasks/
+/out/
+/site/
+/Config/
